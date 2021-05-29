@@ -13,19 +13,26 @@ class Dashboard extends React.Component {
         
     }
     handleDelete(id) {
-      axios.delete(`https://localhost:44349/api/users/${id}`).finally(() => {
+      axios.delete(`https://localhost:44349/api/admin/${id}`).finally(() => {
+        console.log(id);
         this.setState(prev => ({...prev, data:prev.data}));
       })
       
     }
 
     componentDidMount() {
-        axios.get(`https://localhost:44349/api/users`)
+        axios.get(`https://localhost:44349/api/admin`, {
+          headers: {"Accept": "application/json",
+                    'Authorization': 'Bearer ' + localStorage.getItem("access_Token")}
+        })
           .then(res => {
+           
             this.setState(prev => ({...prev, data:res.data}));
             console.log(res.data);
           })
-          .catch(error => console.log(error))
+          .catch(
+            error => console.log(error)
+              )
       }
         render() {
             return (

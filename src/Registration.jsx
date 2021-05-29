@@ -31,13 +31,14 @@ class Registration extends React.Component {
           age:e.target.elements.age.value,
           password:e.target.elements.password.value
         }
-        axios.post("https://localhost:44349/api/users", data, {
+        axios.post("https://localhost:44349/api/admin", data, {
           "Content-Type": "application/json"
         })
         .then(function (response) {
           console.log(response);
         })
         .catch(function (error) {
+          console.log(data);
           console.log(error);
         });
 
