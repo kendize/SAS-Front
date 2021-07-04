@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import axios from 'axios';
 import {Form, Button, notification} from 'antd';
+import { apiClient } from '../../utils/API';
 
 export default function Registration() {
   const [Email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function Registration() {
       password: Password
     }
 
-    axios.post("https://localhost:44349/api/admin", data, {
+    apiClient.post("https://localhost:44349/api/admin", data, {
       "Content-Type": "application/json"
     })
     .then(function (response) {

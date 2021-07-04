@@ -9,11 +9,15 @@ import Registration from '../Registration/Registration';
 import Dashboard from '../Dashboard/Dashboard'
 import Home from '../../Home'
 import Login from '../Login/Login'
+import {useDispatch} from 'react-redux'
 
-import {Breadcrumb} from 'antd';
+import {Breadcrumb, Button} from 'antd';
+import { logout } from "../../store/actionCreators/Authentication";
 
-class NavigationBar extends React.Component{
-    render(){
+export default function NavigationBar() {
+    const dispatch = useDispatch();
+//class NavigationBar extends React.Component{
+//    render(){
         return <div>
                     <Breadcrumb>
                         <Router>
@@ -33,6 +37,12 @@ class NavigationBar extends React.Component{
                                 <Link to="/Registration">Реєстрація</Link>
                             </Breadcrumb.Item>
 
+                            <Breadcrumb.Item>
+                                <Button
+                                    onClick = {() => dispatch(logout())}>Logout</Button>
+                            </Breadcrumb.Item>
+
+
                             <Switch>
                                 <Route exact path="/" component={Home} />
                                 <Route path="/Dashboard" component={Dashboard} />
@@ -44,5 +54,3 @@ class NavigationBar extends React.Component{
                     </Breadcrumb>
                 </div>;
     }
-}
-export default NavigationBar

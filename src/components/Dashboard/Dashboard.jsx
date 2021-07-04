@@ -3,36 +3,23 @@ import React, {useState, useEffect} from 'react';
 import {Form, Button, notification} from 'antd';
 import { get_page_of_users } from '../../store/actionCreators/Dashboard';
 import {useDispatch, useSelector} from 'react-redux';
+import { apiClient } from '../../utils/API';
 
 export default function Dashboard()  {
   const dispatch = useDispatch();
-  const userList = useSelector((state) => state.dashboard.userList);
+  const userList = useSelector((store) => store.dashboard.userList);
   const [Data, setData] = useState(userList);
-  
+
 
   const handleDelete = (id) => {
-      axios.delete(`https://localhost:44349/api/admin/${id}`).finally(() => {
+      apiClient.delete(`https://localhost:44349/api/admin/${id}`).finally(() => {
       console.log(id);
     })
   }
-
-
-  //useEffect(() => {
-  //  axios.get(`https://localhost:44349/api/admin`, {
-  //  headers: {"Accept": "application/json",
-  //            'Authorization': 'Bearer ' + localStorage.getItem("access_Token")}
-  //  })
-  //  .then(res => {
-  //    setData(res.data);
-  //    console.log(res.data);
-  //  })
-  //  .catch(
-  //    error => console.log(error)
-  //      )
-  //}, [])
   useEffect( () => {
     dispatch(get_page_of_users());
-  }, [])
+    setData(userList);
+  }, [userList])
 
 return (
   <div>
