@@ -19,7 +19,7 @@ export default function Dashboard()  {
   useEffect( () => {
     dispatch(get_page_of_users());
     setData(userList);
-  }, [userList])
+  }, [dispatch])
 
 return (
   <div>

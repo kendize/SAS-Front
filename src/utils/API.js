@@ -10,6 +10,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.response.use(
   async (res) => {
+    console.log("No error interceptor")
     return res;
   },
   async (error) => {
@@ -17,28 +18,29 @@ apiClient.interceptors.response.use(
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       console.log("Interceptor error 401")
-      const accessToken = store.dispatch(relogin(localStorage.getItem("refreshToken")));
+      const refreshToken = localStorage.getItem("refreshToken");
+      apiClient.post(`https://localhost:44349/api/authentication/reauthenticate`, {refreshToken}, {
+          headers: {"Accept": "application/json",}
+        })
+          .then(response  => {
+                localStorage.setItem("accessToken", response.data.accessToken);
+                localStorage.setItem("refreshToken", response.data.refreshToken);
+          });
+
       console.log(error.config.url)
-      const accessToken2 = localStorage.getItem("accessToken")
-      //console.log("New Refresh token: "+ localStorage.getItem("refreshToken"))
-      //console.log("New Access token: "+ localStorage.getItem("accessToken"))
-      //if (accessToken2) {
-        apiClient.defaults.headers.common['Authorization'] = localStorage.getItem("accessToken");
-        return originalRequest;
-      //} 
-      //else {
-      //  store.commit(LOGOUT);
-      //}
+      const accessToken = localStorage.getItem("accessToken")
+
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
+        return apiClient(originalRequest);
     }
-    //Promise.reject(error)
     return Promise.reject(error)
   },
 );
 
-//apiClient.interceptors.request.use(req => {
-//
-//  req.headers.authorization = `Bearer ${localStorage.getItem("accessToken")}`;
-//  return req;
-//});
+apiClient.interceptors.request.use(req => {
+
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
+  return req;
+});
 
 export { apiClient };
