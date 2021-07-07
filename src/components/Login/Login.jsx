@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Form, Button, notification } from 'antd';
+import { Form, Button} from 'antd';
 import { useDispatch } from 'react-redux';
-import { login } from '../../store/actionCreators/Authentication';
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -10,17 +9,18 @@ export default function Login() {
   const [Password, setPassword] = useState("");
 
   const handleSubmit = () => {
-    //axios.post("https://localhost:44349/api/authentication/authenticate", {Email, Password}, {
-    //  "Content-Type": "application/json"
-    //})
-    //.then(function (response) {
-    //  localStorage.setItem("access_Token", response.data.access_Token);
-    //  localStorage.setItem("refresh_Token", response.data.refresh_Token);
-    //})
-    //.catch(function (error) {
-    //  console.log(error);
-    //});
-    dispatch(login({ Email, Password }));
+    axios.post("https://localhost:44349/api/authentication/authenticate", {Email, Password}, {
+      "Content-Type": "application/json"
+    })
+    .then(function (response) {
+      console.log(response.data)
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+    //dispatch(login({ Email, Password }));
   }
 
   return (

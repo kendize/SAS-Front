@@ -1,7 +1,7 @@
 import axios from "axios";
-import { relogin } from "../store/actionCreators/Authentication";
-import { LOGOUT } from "../store/actions";
-import store from '../store/store'
+
+import {useDispatch} from 'react-redux'
+import { logout } from "../store/actionCreators/Authentication";
 
 const apiClient = axios.create({
   baseURL: "https://localhost:44349/",
@@ -10,7 +10,8 @@ const apiClient = axios.create({
 
 apiClient.interceptors.response.use(
   async (res) => {
-    console.log("No error interceptor")
+    const accessToken = localStorage.getItem("accessToken")
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
     return res;
   },
   async (error) => {
@@ -25,21 +26,18 @@ apiClient.interceptors.response.use(
           .then(response  => {
                 localStorage.setItem("accessToken", response.data.accessToken);
                 localStorage.setItem("refreshToken", response.data.refreshToken);
+                const accessToken = 'Bearer ' + localStorage.getItem("accessToken")
+                originalRequest.headers['Authorization'] = accessToken;
+                return apiClient(originalRequest);
           });
-
-      console.log(error.config.url)
-      const accessToken = localStorage.getItem("accessToken")
-
-        axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
-        return apiClient(originalRequest);
+        
     }
     return Promise.reject(error)
-  },
+  }
 );
 
 apiClient.interceptors.request.use(req => {
-
-  axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
+  axios.defaults.headers['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
   return req;
 });
 

@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
-import axios from 'axios';
-import {Form, Button, notification} from 'antd';
+import {Form, Button} from 'antd';
 import { apiClient } from '../../utils/API';
 
 export default function Registration() {

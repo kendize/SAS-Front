@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { apiClient } from '../../utils/API';
 import { LOGIN, LOGOUT, RELOGIN } from '../actions';
 
@@ -51,5 +50,6 @@ export const logout = () => {
         localStorage.removeItem("refreshToken");
         return {
             type: LOGOUT,
+            
         }
     }

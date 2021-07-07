@@ -5,3 +5,4 @@ export const DELETE_USER = 'DELETE_USER';
 export const LOGIN = 'LOGIN';
 export const RELOGIN = 'RELOGIN';
 export const LOGOUT = 'LOGOUT';
+export const GET_PAGINATION_INFO = 'GET_PAGINATION_INFO';

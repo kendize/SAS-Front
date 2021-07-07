@@ -1,5 +1,5 @@
 import React from "react";
-
+import "./antd.css"
 function App() {
   
   return (
