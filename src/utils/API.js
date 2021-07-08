@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import {useDispatch} from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { logout } from "../store/actionCreators/Authentication";
 
 const apiClient = axios.create({
@@ -11,7 +11,7 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use(
   async (res) => {
     const accessToken = localStorage.getItem("accessToken")
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
+    axios.defaults.headers['Authorization'] = 'Bearer ' + accessToken;
     return res;
   },
   async (error) => {
@@ -20,17 +20,18 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       console.log("Interceptor error 401")
       const refreshToken = localStorage.getItem("refreshToken");
-      apiClient.post(`https://localhost:44349/api/authentication/reauthenticate`, {refreshToken}, {
-          headers: {"Accept": "application/json",}
-        })
-          .then(response  => {
-                localStorage.setItem("accessToken", response.data.accessToken);
-                localStorage.setItem("refreshToken", response.data.refreshToken);
-                const accessToken = 'Bearer ' + localStorage.getItem("accessToken")
-                originalRequest.headers['Authorization'] = accessToken;
-                return apiClient(originalRequest);
-          });
-        
+      return apiClient.post(`api/authentication/reauthenticate`, { refreshToken }, {
+        headers: { "Accept": "application/json", }
+      })
+        .then(response => {
+          localStorage.setItem("accessToken", response.data.accessToken);
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+          const accessToken = 'Bearer ' + localStorage.getItem("accessToken")
+          originalRequest.headers['Authorization'] = accessToken;
+          console.log("Interceptor dealed with 401")
+          return apiClient(originalRequest);
+        });
+
     }
     return Promise.reject(error)
   }

@@ -32,18 +32,14 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    //setCurrentPage(1);
     dispatch(get_page_of_users(currentPage));
-    console.log(userList)
-    setNumberOfUsers(store.getState().dashboard.numberOfUsers)
-    setData(userList);
   }, [])
 
   useEffect(() => {
-    setData(userList);
+    setData(store.getState().dashboard.userList);
     setNumberOfUsers(store.getState().dashboard.numberOfUsers)
     setCurrentPage(currentPage)
-  }, [userList, currentPage, numberOfUsers])
+  }, [store.getState().dashboard.userList, currentPage, store.getState().dashboard.numberOfUsers])
   //const total = store.getState().dashboard.numberOfUsers
 
   const columns = [
@@ -109,7 +105,7 @@ export default function Dashboard() {
     <div>
       
 
-      <Table dataSource={Data} columns={columns}
+      <Table dataSource={userList} columns={columns}
       pagination={false} />
 
       <Pagination сurrent={currentPage}

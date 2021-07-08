@@ -5,7 +5,7 @@ import store from "../store";
 export const get_page_of_users = (page) => {
   return async (dispatch) => {
     //const page = store.getState().dashboard.paginationInfo.currentPage
-    await apiClient.get(`https://localhost:44349/api/admin/${page}`, {
+    await apiClient.get(`api/admin/${page}`, {
       headers: {
         "Accept": "application/json",
         'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
@@ -21,7 +21,7 @@ export const get_page_of_users = (page) => {
         }
       )
       .catch(
-        error => console.log(error)
+        error => console.log("action creator error: " + error)
       )
   };
 }
