@@ -9,7 +9,7 @@ const initialState = {
 export const DashboardReducer = (state = initialState, action) => {
     switch (action.type) {
         case GET_PAGE_OF_USERS: {
-            return {...state, userList: action.payload.userList, numberOfUsers: action.payload.numberOfUsers};
+            return {...state, userList: action.payload.users, numberOfUsers: action.payload.numberOfUsers};
         }
         case GET_PAGINATION_INFO: {
             return {...state, paginationInfo: action.payload}

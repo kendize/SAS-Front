@@ -2,14 +2,25 @@ import { apiClient } from "../../utils/API";
 import { GET_PAGE_OF_USERS, GET_PAGINATION_INFO } from "../actions";
 import store from "../store";
 
-export const get_page_of_users = (page) => {
+export const get_page_of_users = (pageNumber, pageSize, orderColumnName, orderBy, searchString) => {
   return async (dispatch) => {
-    //const page = store.getState().dashboard.paginationInfo.currentPage
-    await apiClient.get(`api/admin/${page}`, {
+    await apiClient.get(`api/admin/`,
+
+
+    { 
       headers: {
         "Accept": "application/json",
         'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
+      },
+      params:
+      {
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+        orderColumnName: orderColumnName,
+        orderBy: orderBy,
+        searchString: searchString
       }
+
     })
       .then(
         ({ data }) => {
