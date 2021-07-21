@@ -25,9 +25,10 @@ export default function Dashboard() {
       dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString));
       setNumberOfUsers(store.getState().dashboard.numberOfUsers)
       setData(userList);
-      
+
     })
   }
+
   const handleSorting = (pagination, filters, sorter) => {
     //setCurrentPage(1);
     setOrderColumnName(sorter.field)
@@ -38,7 +39,6 @@ export default function Dashboard() {
     console.log(pagination)
   }
 
-
   const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
     setOrderBy(OrderBy);
     setCurrentPage(pageNumber);
@@ -48,7 +48,7 @@ export default function Dashboard() {
     //setNumberOfUsers(store.getState().dashboard.numberOfUsers)// ?
     setData(userList);
     //console.log("Current Page: " + pageNumber)
-    
+
   }
 
   useEffect(() => {
@@ -59,11 +59,11 @@ export default function Dashboard() {
     setData(userList);
     setNumberOfUsers(store.getState().dashboard.numberOfUsers)
     setCurrentPage(currentPage)
-    
+    console.log(userList)
   }, [store.getState().dashboard.userList, store.getState().dashboard.numberOfUsers, currentPage, numberOfUsers])
   const total = store.getState().dashboard.numberOfUsers
 
-  const columns = [
+  const dashboardColumns = [
     {
       title: "Id",
       dataIndex: 'id',
@@ -130,6 +130,33 @@ export default function Dashboard() {
     },
   ];
 
+  const expandedColumns = [
+    {
+      title: "Course Id",
+      dataIndex: 'courseId',
+      key: 'id',
+      sortDirections: ['ascend', 'descend', 'ascend'],
+      render: (record) => <p>{record}</p>
+    },
+    {
+      title: "Course name",
+      dataIndex: ["course", "courseName"],
+      key: 'courseName',
+      sortDirections: ['ascend', 'descend', 'ascend'],
+    },
+    {
+      title: "Course Description",
+      dataIndex: ["course", "courseDescription"],
+      key: 'courseName',
+      sortDirections: ['ascend', 'descend', 'ascend'],
+    },
+    {
+      title: "Study Date",
+      dataIndex: "studyDate",
+      key: 'courseName',
+      sortDirections: ['ascend', 'descend', 'ascend'],
+    }
+  ];
   return (
     <div>
 
@@ -139,12 +166,29 @@ export default function Dashboard() {
         //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
       }
       } style={{ width: 200 }} />
-      <Table dataSource={userList} 
-        columns={columns}
-        pagination={false} 
-        onChange= {handleSorting}
-        />
-    
+
+      <Table
+        dataSource={userList}
+        columns={dashboardColumns}
+        pagination={false}
+        onChange={handleSorting}
+        onExpand={(expanded, record) => { console.log(expanded + "|" + record.id) }}
+        expandedRowKeys={userList.map(item => item.key)}
+        expandable={
+          {
+            expandedRowRender: (record) =>
+              <Table
+                dataSource={record.userCourses}
+                columns={expandedColumns}
+                pagination={false}
+                bordered
+
+              />
+          }
+        }
+
+      />
+
       <Pagination сurrent={currentPage}
         pageSize={5}
         total={numberOfUsers}//{store.getState().dashboard.numberOfUsers}
