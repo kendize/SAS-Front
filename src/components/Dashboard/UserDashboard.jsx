@@ -1,12 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col } from 'antd';
-import { get_page_of_users, get_pagination_info } from '../../store/actionCreators/Dashboard';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography } from 'antd';
+import { get_page_of_users } from '../../store/actionCreators/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiClient } from '../../utils/API';
 import store from '../../store/store';
+
 const { Search } = Input;
-export default function Dashboard() {
+const { Text } = Typography;
+
+export default function UserDashboard() {
   const dispatch = useDispatch();
   const userList = useSelector((store) => store.dashboard.userList);
   const [Data, setData] = useState(userList);
@@ -17,9 +19,63 @@ export default function Dashboard() {
   const [pageSize, setPageSize] = useState(5)
   const [searchString, setSearchString] = useState("")
 
+  const [editUserVisible, setEditUserVisible] = useState(false);
+
+  const [userId, setUserId] = useState("");
+  const [Email, setEmail] = useState("")
+  const [FirstName, setFirstName] = useState("")
+  const [LastName, setLastName] = useState("")
+  const [Age, setAge] = useState("")
+
+  const [expandedKey, setExpandedKey] = useState([])
+
+  const handleExpand = (expanded, record) => {
+    if (expanded) {
+      setExpandedKey([record.id])
+    }
+    else {
+      setExpandedKey("");
+    }
+  }
+
+  const showEditUserModal = (record) => {
+    setUserId(record.id);
+    setEmail(record.email);
+    setAge(record.age);
+    setFirstName(record.firstName);
+    setLastName(record.lastName);
+    setEditUserVisible(true);
+
+  };
+
+  const hideEditUserModal = () => {
+    setEditUserVisible(false);
+  };
+
+  const handleEditUserModal = () => {
+    apiClient.put("https://localhost:44349/api/admin", { id: userId, firstname: FirstName, lastname: LastName, age: Age, email: Email }, {
+      "Content-Type": "application/json"
+    })
+      .then(function (response) {
+        console.log(response);
+        setEditUserVisible(false);
+        dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString));
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+  }
 
   const handleDelete = (id) => {
-    apiClient.delete(`https://localhost:44349/api/admin/${id}`).finally(() => {
+    apiClient.delete(`https://localhost:44349/api/admin/${id}`,
+    {
+      headers: {
+        "Accept": "application/json",
+        'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
+      },
+    })
+    .finally(() => {
       console.log(id);
       setCurrentPage(1);
       dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString));
@@ -34,9 +90,7 @@ export default function Dashboard() {
     setOrderColumnName(sorter.field)
     setOrderBy(sorter.order)
     dispatch(get_page_of_users(currentPage, pageSize, sorter.field, sorter.order, searchString))
-    console.log(sorter.field)
-    console.log(sorter.order)
-    console.log(pagination)
+
   }
 
   const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
@@ -59,18 +113,9 @@ export default function Dashboard() {
     setData(userList);
     setNumberOfUsers(store.getState().dashboard.numberOfUsers)
     setCurrentPage(currentPage)
-    console.log(userList)
   }, [store.getState().dashboard.userList, store.getState().dashboard.numberOfUsers, currentPage, numberOfUsers])
-  const total = store.getState().dashboard.numberOfUsers
 
   const dashboardColumns = [
-    {
-      title: "Id",
-      dataIndex: 'id',
-      key: 'id',
-      sorter: true,
-      sortDirections: ['ascend', 'descend', 'ascend']
-    },
     {
       title: "First Name",
       dataIndex: 'firstName',
@@ -111,21 +156,30 @@ export default function Dashboard() {
       title: 'Action',
       key: 'action',
       render: (record) => (
-        <Popconfirm
-          title="Delete this user?"
-          onConfirm={() => handleDelete(record.id)}
-          onCancel={(e) => console.log(e)}//onClick={() => handleDelete(record.id)}
-          okText="Yes"
-          cancelText="No">
-
+        <Space align="center">
           <Button
             size="middle"
             type="primary"
+            onClick={() => showEditUserModal(record)}
           >
-            Видалити
+            Edit user
           </Button>
 
-        </Popconfirm>
+          <Popconfirm
+            title="Delete this user?"
+            onConfirm={() => handleDelete(record.id)}
+            onCancel={(e) => console.log(e)}//onClick={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No">
+            <Button
+            danger
+              size="middle"
+            >
+              Delete
+            </Button>
+
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -159,7 +213,63 @@ export default function Dashboard() {
   ];
   return (
     <div>
-
+      <Modal
+        visible={editUserVisible}
+        title="Edit user"
+        closable={false}
+        onOk={handleEditUserModal}
+        onCancel={hideEditUserModal}
+      >
+        <p><b>User Id: </b>{userId}</p>
+        <Form>
+          <Space direction="vertical" align="end">
+            <Space align="baseline">
+              <Text>First Name</Text>
+              <Form.Item>
+                <input
+                  type="text"
+                  value={FirstName}
+                  placeholder="First Name"
+                  onChange={event => setFirstName(event.target.value)}
+                />
+              </Form.Item>
+            </Space>
+            <Space align="baseline">
+              <Text>Last Name</Text>
+              <Form.Item>
+                <input
+                  type="text"
+                  value={LastName}
+                  placeholder="Last Name"
+                  onChange={event => setLastName(event.target.value)}
+                />
+              </Form.Item>
+            </Space>
+            <Space align="baseline">
+              <Form.Item>
+                <Text>Email </Text>
+                <input
+                  type="text"
+                  value={Email}
+                  placeholder="Email"
+                  onChange={event => setEmail(event.target.value)}
+                />
+              </Form.Item>
+            </Space>
+            <Space align="baseline">
+              <Text>Age</Text>
+              <Form.Item>
+                <input
+                  type="number"
+                  value={Age}
+                  placeholder="Age"
+                  onChange={event => setAge(event.target.value)}
+                />
+              </Form.Item>
+            </Space>
+          </Space>
+        </Form>
+      </Modal>
       <Search placeholder="search by email:" onSearch={(string) => {
         //setSearchString(string);
         handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
@@ -172,8 +282,9 @@ export default function Dashboard() {
         columns={dashboardColumns}
         pagination={false}
         onChange={handleSorting}
-        onExpand={(expanded, record) => { console.log(expanded + "|" + record.id) }}
-        expandedRowKeys={userList.map(item => item.key)}
+        onExpand={(expanded, record) => { handleExpand(expanded, record);}}
+        rowKey="id"
+        expandedRowKeys={expandedKey}
         expandable={
           {
             expandedRowRender: (record) =>

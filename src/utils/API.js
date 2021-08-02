@@ -26,6 +26,7 @@ apiClient.interceptors.response.use(
         .then(response => {
           localStorage.setItem("accessToken", response.data.accessToken);
           localStorage.setItem("refreshToken", response.data.refreshToken);
+          localStorage.setItem("Role", response.data.role);
           const accessToken = 'Bearer ' + localStorage.getItem("accessToken")
           originalRequest.headers['Authorization'] = accessToken;
           console.log("Interceptor dealed with 401")
@@ -38,7 +39,8 @@ apiClient.interceptors.response.use(
 );
 
 apiClient.interceptors.request.use(req => {
-  axios.defaults.headers['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
+  apiClient.defaults.headers['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
+  console.log("request")
   return req;
 });
 

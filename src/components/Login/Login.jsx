@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Form, Button} from 'antd';
 import { useDispatch } from 'react-redux';
+import { LOGIN } from '../../store/actions';
+import { isLogin } from '../../utils';
+import { useHistory } from "react-router-dom";
+
 
 export default function Login() {
+  const history = useHistory();
   const dispatch = useDispatch();
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
@@ -13,9 +18,16 @@ export default function Login() {
       "Content-Type": "application/json"
     })
     .then(function (response) {
-      console.log(response.data)
       localStorage.setItem("accessToken", response.data.accessToken);
       localStorage.setItem("refreshToken", response.data.refreshToken);
+      localStorage.setItem("Role", response.data.role);
+
+      dispatch({
+        type: LOGIN,
+        payload: response.data,
+        authorized: true
+    })
+    history.push('/')
     })
     .catch(function (error) {
       console.log(error);

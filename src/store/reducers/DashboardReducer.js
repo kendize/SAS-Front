@@ -1,8 +1,10 @@
-import { GET_PAGE_OF_USERS, GET_PAGINATION_INFO, LOGOUT } from "../actions";
+import { GET_PAGE_OF_COURSES, GET_PAGE_OF_USERS, LOGOUT } from "../actions";
 
 const initialState = {
     userList: [],
+    courseList: [],
     numberOfUsers: 0,
+    numberOfCourses: 0,
     loading: true
 };
 
@@ -11,8 +13,8 @@ export const DashboardReducer = (state = initialState, action) => {
         case GET_PAGE_OF_USERS: {
             return {...state, userList: action.payload.users, numberOfUsers: action.payload.numberOfUsers};
         }
-        case GET_PAGINATION_INFO: {
-            return {...state, paginationInfo: action.payload}
+        case GET_PAGE_OF_COURSES: {
+            return {...state, courseList: action.payload.courses, numberOfCourses: action.payload.numberOfCourses};
         }
         case LOGOUT: {
             return {...initialState }
