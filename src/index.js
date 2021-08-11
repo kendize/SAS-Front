@@ -6,21 +6,26 @@ import reportWebVitals from './reportWebVitals';
 import NavigationBar from './components/NavigationBar/NavigationBar';
 import {Provider} from 'react-redux'
 import store from './store/store';
+import { initFacebookSdk } from './utils/init-facebook-sdk';
 
+initFacebookSdk().then(startApp)
 
-ReactDOM.render(
-  <Provider store={store}>
-  <React.StrictMode>
-    <App />
-    <hr />
-    <NavigationBar />
-    
-    
-    
-  </React.StrictMode>
-  </Provider>,
-  document.getElementById('root')
-);
+function startApp () {
+  ReactDOM.render(
+    <Provider store={store}>
+    <React.StrictMode>
+      <App />
+      <hr />
+      <NavigationBar />
+      
+      
+      
+    </React.StrictMode>
+    </Provider>,
+    document.getElementById('root')
+  );
+}
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

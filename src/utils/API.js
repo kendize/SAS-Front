@@ -40,7 +40,6 @@ apiClient.interceptors.response.use(
 
 apiClient.interceptors.request.use(req => {
   apiClient.defaults.headers['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
-  console.log("request")
   return req;
 });
 
