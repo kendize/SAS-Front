@@ -9,8 +9,12 @@
     "antd": "^4.16.0",
     "axios": "^0.21.1",
     "jwt-decode": "^3.1.2",
+    "mkcert": "^1.4.0",
+    "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-facebook-login": "^4.1.1",
+    "react-query": "^3.21.0",
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
@@ -19,7 +23,7 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "set HTTPS=true&&react-scripts start",
+    "start": "set HTTPS=true&&set SSL_CRT_FILE=src/utils/cert.crt&&set SSL_KEY_FILE=src/utils/cert.key&&react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

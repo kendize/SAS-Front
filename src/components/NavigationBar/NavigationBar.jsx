@@ -18,6 +18,8 @@ import PrivateRoute from "../../utils/PrivateRoute";
 import { isLogin } from "../../utils";
 import store from "../../store/store";
 import Courses from "../Courses/Courses";
+import EmailConfirmation from "../Profile/EmailConfirmation";
+import axios from "axios";
 
 const { SubMenu } = Menu;
 
@@ -31,11 +33,18 @@ const NavigationBar = () => {
             }
         }
     )
+    const test = () => {
+        axios.get("https://localhost:44349/Hangfire",
+        {headers: { "Authorization": 'Bearer ' + localStorage.getItem("accessToken"), }}
+        )
+        //axios.defaults.headers['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
+    }
     const auth = state.authorized
     return (
         <div>
+            <Router>
             <Breadcrumb>
-                <Router>
+                
                     <Breadcrumb.Item>
                         <Link to="/">Home</Link>
                     </Breadcrumb.Item>
@@ -48,6 +57,9 @@ const NavigationBar = () => {
                                     </Menu.Item>
                                     <Menu.Item>
                                         <Link to="/CourseDashboard">Courses</Link>
+                                    </Menu.Item>
+                                    <Menu.Item>
+                                        <a href="https://localhost:44349/Hangfire" onClick = {() => test()}>Hangfire</a>
                                     </Menu.Item>
                                 </Menu>
                             }>
@@ -77,19 +89,17 @@ const NavigationBar = () => {
                         </>
                     }
 
-
-
-                    <Switch>
+            </Breadcrumb>
+            <Switch>
                         <PublicRoute exact path="/" component={Home} />
                         <PrivateRoute path="/UserDashboard" component={UserDashboard} />
                         <PrivateRoute path="/CourseDashboard" component={CourseDashboard} />
                         <PublicRoute path="/Courses" component={Courses} />
                         <PublicRoute path="/Login" component={Login} />
                         <PublicRoute path="/Registration" component={Registration} />
+                        <PublicRoute exact path="/EmailConfirmation/:userid&:code" component={EmailConfirmation} />
                     </Switch>
-
-                </Router>
-            </Breadcrumb>
+            </Router>
         </div>
     )
 }

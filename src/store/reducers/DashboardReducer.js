@@ -14,7 +14,7 @@ export const DashboardReducer = (state = initialState, action) => {
             return {...state, userList: action.payload.users, numberOfUsers: action.payload.numberOfUsers};
         }
         case GET_PAGE_OF_COURSES: {
-            return {...state, courseList: action.payload.courses, numberOfCourses: action.payload.numberOfCourses};
+            return {...state, courseList: action.payload.courses, numberOfCourses: action.payload.numberOfCourses, loading: false};
         }
         case LOGOUT: {
             return {...initialState }

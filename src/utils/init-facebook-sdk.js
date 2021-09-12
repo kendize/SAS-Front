@@ -1,5 +1,3 @@
-import { apiClient } from "./API";
-
 const facebookAppId = 816296639049704;
 
 export function initFacebookSdk() {

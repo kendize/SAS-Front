@@ -7,11 +7,13 @@ import NavigationBar from './components/NavigationBar/NavigationBar';
 import {Provider} from 'react-redux'
 import store from './store/store';
 import { initFacebookSdk } from './utils/init-facebook-sdk';
-
-initFacebookSdk().then(startApp)
+import { QueryClient, QueryClientProvider } from "react-query";
+initFacebookSdk().then(startApp())
 
 function startApp () {
+  const queryClient = new QueryClient();
   ReactDOM.render(
+    <QueryClientProvider client={queryClient}>
     <Provider store={store}>
     <React.StrictMode>
       <App />
@@ -21,7 +23,7 @@ function startApp () {
       
       
     </React.StrictMode>
-    </Provider>,
+    </Provider></QueryClientProvider>,
     document.getElementById('root')
   );
 }

@@ -271,7 +271,7 @@ export default function CourseDashboard() {
                 </Form>
             </Modal>
 
-            <Search placeholder="search by name:" onSearch={(string) => {
+            <Search placeholder="search by name:" allowClear onSearch={(string) => {
                 //setSearchString(string);
                 handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
                 //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))

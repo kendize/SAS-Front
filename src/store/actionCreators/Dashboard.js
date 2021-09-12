@@ -1,6 +1,5 @@
 import { apiClient } from "../../utils/API";
 import { GET_PAGE_OF_USERS, GET_PAGE_OF_COURSES} from "../actions";
-import store from "../store";
 
 export const get_page_of_users = (pageNumber, pageSize, orderColumnName, orderBy, searchString) => {
   return async (dispatch) => {

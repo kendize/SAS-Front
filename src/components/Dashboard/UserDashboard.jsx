@@ -270,7 +270,7 @@ export default function UserDashboard() {
           </Space>
         </Form>
       </Modal>
-      <Search placeholder="search by email:" onSearch={(string) => {
+      <Search placeholder="search by email:" allowClear onSearch={(string) => {
         //setSearchString(string);
         handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
         //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
