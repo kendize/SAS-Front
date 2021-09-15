@@ -7,5 +7,6 @@ export const DELETE_USER = 'DELETE_USER';
 export const LOGIN = 'LOGIN';
 export const RELOGIN = 'RELOGIN';
 export const LOGOUT = 'LOGOUT';
+export const RELOAD = 'RELOAD'
 //export const GET_USERS_PAGINATION_INFO = 'GET_USERS_PAGINATION_INFO';
 //export const GET_COURSES_PAGINATION_INFO = 'GET_COURSES_PAGINATION_INFO';

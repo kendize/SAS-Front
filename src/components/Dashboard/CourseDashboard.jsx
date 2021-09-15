@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image } from 'antd';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Spin } from 'antd';
 import { get_page_of_courses } from '../../store/actionCreators/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiClient } from '../../utils/API';
 import store from '../../store/store';
-
+import { isAdmin } from '../../utils';
+import { Redirect } from 'react-router';
+import { RELOAD } from '../../store/actions';
 const { Search } = Input;
+const { TextArea } = Input;
 const { Text } = Typography;
 
 export default function CourseDashboard() {
@@ -28,7 +31,7 @@ export default function CourseDashboard() {
     const [courseImgUrl, setCourseImgUrl] = useState("")
 
     const [expandedKey, setExpandedKey] = useState([])
-
+    const isLoading = useSelector((store) => store.dashboard.coursesLoading);
     const handleExpand = (expanded, record) => {
         if (expanded) {
             setExpandedKey([record.id])
@@ -63,6 +66,11 @@ export default function CourseDashboard() {
     };
 
     const handleEditCourseModal = () => {
+        dispatch(
+            {
+              type: RELOAD
+            }
+          )
         apiClient.put("https://localhost:44349/api/course", { id: courseId, coursename: courseName, courseDescription: courseDescription, courseImgUrl: courseImgUrl }, {
             "Content-Type": "application/json"
         })
@@ -78,6 +86,11 @@ export default function CourseDashboard() {
     }
 
     const handleCreateCourseModal = () => {
+        dispatch(
+            {
+              type: RELOAD
+            }
+          )
         apiClient.post("https://localhost:44349/api/course", { coursename: courseName, courseDescription: courseDescription, courseImgUrl: courseImgUrl }, {
             "Content-Type": "application/json"
         })
@@ -93,6 +106,11 @@ export default function CourseDashboard() {
     }
 
     const handleDelete = (id) => {
+        dispatch(
+            {
+              type: RELOAD
+            }
+          )
         apiClient.delete(`https://localhost:44349/api/course/${id}`).finally(() => {
             console.log(id);
             setCurrentPage(1);
@@ -104,7 +122,11 @@ export default function CourseDashboard() {
     }
 
     const handleSorting = (pagination, filters, sorter) => {
-        //setCurrentPage(1);
+        dispatch(
+            {
+              type: RELOAD
+            }
+          )
         setOrderColumnName(sorter.field)
         setOrderBy(sorter.order)
         dispatch(get_page_of_courses(currentPage, pageSize, sorter.field, sorter.order, searchString))
@@ -114,6 +136,11 @@ export default function CourseDashboard() {
     }
 
     const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
+        dispatch(
+            {
+              type: RELOAD
+            }
+          )
         setOrderBy(OrderBy);
         setCurrentPage(pageNumber);
         setOrderColumnName(ColumnName);
@@ -164,7 +191,7 @@ export default function CourseDashboard() {
                         okText="Yes"
                         cancelText="No">
                         <Button
-                        danger
+                            danger
                             size="middle"
                         >
                             Delete
@@ -175,148 +202,166 @@ export default function CourseDashboard() {
             ),
         },
     ];
-
-    return (
-        <div>
-            <Modal
-                visible={editCourseVisible}
-                title="Edit course"
-                closable={false}
-                onOk={handleEditCourseModal}
-                onCancel={hideEditCourseModal}
-            >
-                <p><b>Course Id: </b>{courseId}</p>
-                <Form>
-                    <Space direction="vertical" align="end">
-                        <Space align="baseline">
-                            <Text>Course Name</Text>
-                            <Form.Item>
-                                <input
-                                    type="text"
-                                    value={courseName}
-                                    placeholder="Course Name"
-                                    onChange={event => setCourseName(event.target.value)}
-                                />
-                            </Form.Item>
-                        </Space>
-                        <Space align="baseline">
-                            <Text>Course Description</Text>
-                            <Form.Item>
-                                <input
-                                    type="text"
-                                    value={courseDescription}
-                                    placeholder="Course Description"
-                                    onChange={event => setCourseDescription(event.target.value)}
-                                />
-                            </Form.Item>
-                        </Space>
-                        <Space align="baseline">
-                            <Form.Item>
-                                <Text>Course Image URL</Text>
-                                <input
-                                    type="text"
-                                    value={courseImgUrl}
-                                    placeholder="Course Image URL"
-                                    onChange={event => setCourseImgUrl(event.target.value)}
-                                />
-                            </Form.Item>
-                        </Space>
-                    </Space>
-                </Form>
-            </Modal>
-
-            <Modal
-                visible={createCourseVisible}
-                title="Create course"
-                closable={false}
-                onOk={handleCreateCourseModal}
-                onCancel={hideCreateCourseModal}
-            >
-                <Form>
-                    <Space direction="vertical" align="end">
-                        <Space align="baseline">
-                            <Text>Course Name</Text>
-                            <Form.Item>
-                                <input
-                                    type="text"
-                                    value={courseName}
-                                    placeholder="Course Name"
-                                    onChange={event => setCourseName(event.target.value)}
-                                />
-                            </Form.Item>
-                        </Space>
-                        <Space align="baseline">
-                            <Text>Course Description</Text>
-                            <Form.Item>
-                                <input
-                                    type="text"
-                                    value={courseDescription}
-                                    placeholder="Course Description"
-                                    onChange={event => setCourseDescription(event.target.value)}
-                                />
-                            </Form.Item>
-                        </Space>
-                        <Space align="baseline">
-                            <Form.Item>
-                                <Text>Course Image URL</Text>
-                                <input
-                                    type="text"
-                                    value={courseImgUrl}
-                                    placeholder="Course Image URL"
-                                    onChange={event => setCourseImgUrl(event.target.value)}
-                                />
-                            </Form.Item>
-                        </Space>
-                    </Space>
-                </Form>
-            </Modal>
-
-            <Search placeholder="search by name:" allowClear onSearch={(string) => {
-                //setSearchString(string);
-                handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
-                //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
+    const state = useSelector(
+        (state) => {
+            return {
+                authorized: state.authentication.authorized,
+                isAdmin: state.authentication.isAdmin
             }
-            } style={{ width: 200 }} />
-
-            <Table
-                dataSource={courseList}
-                columns={dashboardColumns}
-                pagination={false}
-                onChange={handleSorting}
-                onExpand={(expanded, record) => { handleExpand(expanded, record); console.log(store.getState().authentication.authorized)}}
-                rowKey="id"
-                expandedRowKeys={expandedKey}
-                expandable={
-                    {
-                        expandedRowRender: (record) =>
-                            <div>
-                                <Image
-                                    width={200}
-                                    src={record.courseImgUrl}
-                                />
-                                <p>
-                                    <b>Description:</b>
-                                    {record.courseDescription}</p>
-                            </div>
-
-                    }
-                }
-
-            />
-            <Space align="end">
-                <Pagination сurrent={currentPage}
-                    pageSize={5}
-                    total={numberOfCourses}//{store.getState().dashboard.numberOfUsers}
-                    onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
-                <Button
-                    size="middle"
-                    type="primary"
-                    onClick={() => showCreateCourseModal()}
+        }
+    )
+    const isAdmin = state.isAdmin
+    return (
+        <>
+            {isAdmin ? <div>
+                <Modal
+                    visible={editCourseVisible}
+                    title="Edit course"
+                    closable={false}
+                    onCancel={hideEditCourseModal}
+                    onOk={handleEditCourseModal}
+                    
                 >
-                    Create course
-                </Button>
-            </Space>
-        </div>
+                    <Form>
+                        <Space direction="vertical" align="start">
+                            <Space direction="vertical">
+                                <Text>Course Name</Text>
+                                <Form.Item>
+                                    <Input
+                                        type="text"
+                                        value={courseName}
+                                        placeholder="Course Name"
+                                        onChange={event => setCourseName(event.target.value)}
+                                        style={{ width: '400px' }}
+                                    />
+                                </Form.Item>
+                            </Space>
+                            <Space direction="vertical">
+                                <Text>Course Description</Text>
+                                <Form.Item>
+                                    <Input
+                                        type="text"
+                                        value={courseDescription}
+                                        placeholder="Course Description"
+                                        onChange={event => setCourseDescription(event.target.value)}
+                                        style={{ width: '400px' }}
+                                    />
+                                </Form.Item>
+                            </Space>
+                            <Space direction="vertical">
+                                <Form.Item>
+                                    <Text>Course Image URL</Text>
+                                    <TextArea
+                                        autoSize={{ minRows: 2, maxRows: 6 }}
+                                        type="text"
+                                        value={courseImgUrl}
+                                        placeholder="Course Image URL"
+                                        onChange={event => setCourseImgUrl(event.target.value)}
+                                        style={{ width: '400px' }}
+                                    />
+                                </Form.Item>
+                            </Space>
+                        </Space>
+                    </Form>
+                </Modal>
+
+                <Modal
+                    visible={createCourseVisible}
+                    title="Create course"
+                    closable={false}
+                    onOk={handleCreateCourseModal}
+                    onCancel={hideCreateCourseModal}
+                >
+                    <Form>
+                        <Space direction="vertical" align="start">
+                            <Space direction="vertical">
+                                <Text>Course Name</Text>
+                                <Form.Item>
+                                    <Input
+                                        type="text"
+                                        value={courseName}
+                                        placeholder="Course Name"
+                                        onChange={event => setCourseName(event.target.value)}
+                                        style={{ width: '400px' }}
+                                    />
+                                </Form.Item>
+                            </Space>
+                            <Space  direction="vertical">
+                                <Text>Course Description</Text>
+                                <Form.Item>
+                                    <Input
+                                        type="text"
+                                        value={courseDescription}
+                                        placeholder="Course Description"
+                                        onChange={event => setCourseDescription(event.target.value)}
+                                        style={{ width: '400px' }}
+                                    />
+                                </Form.Item>
+                            </Space>
+                            <Space  direction="vertical">
+                                <Form.Item>
+                                    <Text>Course Image URL</Text>
+                                    <TextArea
+                                        autoSize={{ minRows: 2, maxRows: 6 }}
+                                        type="text"
+                                        value={courseImgUrl}
+                                        placeholder="Course Image URL"
+                                        onChange={event => setCourseImgUrl(event.target.value)}
+                                        style={{ width: '400px' }}
+                                    />
+                                </Form.Item>
+                            </Space>
+                        </Space>
+                    </Form>
+                </Modal>
+                <br/>
+                <Search placeholder="search by name:" allowClear onSearch={(string) => {
+                    //setSearchString(string);
+                    handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
+                    //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
+                }
+                } style={{ width: 200 }} /><br/><br />
+                <Spin
+                    spinning={isLoading}>
+                    <Table
+                        dataSource={courseList}
+                        columns={dashboardColumns}
+                        pagination={false}
+                        onChange={handleSorting}
+                        onExpand={(expanded, record) => { handleExpand(expanded, record); console.log(store.getState().authentication.authorized) }}
+                        rowKey="id"
+                        expandedRowKeys={expandedKey}
+                        expandable={
+                            {
+                                expandedRowRender: (record) =>
+                                    <div>
+                                        <Image
+                                            width={200}
+                                            src={record.courseImgUrl}
+                                        />
+                                        <p>
+                                            <b>Description:</b>
+                                            {record.courseDescription}</p>
+                                    </div>
+
+                            }
+                        }
+
+                    /></Spin>
+                <Space align="end">
+                    <Pagination сurrent={currentPage}
+                        pageSize={5}
+                        total={numberOfCourses}//{store.getState().dashboard.numberOfUsers}
+                        onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
+                    <Button
+                        size="middle"
+                        type="primary"
+                        onClick={() => showCreateCourseModal()}
+                    >
+                        Create course
+                    </Button>
+                </Space>
+            </div> : <Redirect exact to="/401" />}</>
     );
 
 }

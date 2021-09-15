@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography } from 'antd';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Spin } from 'antd';
 import { get_page_of_users } from '../../store/actionCreators/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiClient } from '../../utils/API';
 import store from '../../store/store';
-
+import { Redirect } from 'react-router';
+import { isAdmin } from '../../utils';
+import { RELOAD } from '../../store/actions';
 const { Search } = Input;
 const { Text } = Typography;
+
 
 export default function UserDashboard() {
   const dispatch = useDispatch();
@@ -26,7 +29,7 @@ export default function UserDashboard() {
   const [FirstName, setFirstName] = useState("")
   const [LastName, setLastName] = useState("")
   const [Age, setAge] = useState("")
-
+  const isLoading = useSelector((store) => store.dashboard.usersLoading);
   const [expandedKey, setExpandedKey] = useState([])
 
   const handleExpand = (expanded, record) => {
@@ -53,6 +56,11 @@ export default function UserDashboard() {
   };
 
   const handleEditUserModal = () => {
+    dispatch(
+      {
+        type: RELOAD
+      }
+    )
     apiClient.put("https://localhost:44349/api/admin", { id: userId, firstname: FirstName, lastname: LastName, age: Age, email: Email }, {
       "Content-Type": "application/json"
     })
@@ -68,24 +76,33 @@ export default function UserDashboard() {
   }
 
   const handleDelete = (id) => {
+    dispatch(
+      {
+        type: RELOAD
+      }
+    )
     apiClient.delete(`https://localhost:44349/api/admin/${id}`,
-    {
-      headers: {
-        "Accept": "application/json",
-        'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
-      },
-    })
-    .finally(() => {
-      console.log(id);
-      setCurrentPage(1);
-      dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString));
-      setNumberOfUsers(store.getState().dashboard.numberOfUsers)
-      setData(userList);
+      {
+        headers: {
+          "Accept": "application/json",
+          'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
+        },
+      })
+      .finally(() => {
+        setCurrentPage(1);
+        dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString));
+        setNumberOfUsers(store.getState().dashboard.numberOfUsers)
+        setData(userList);
 
-    })
+      })
   }
 
   const handleSorting = (pagination, filters, sorter) => {
+    dispatch(
+      {
+        type: RELOAD
+      }
+    )
     //setCurrentPage(1);
     setOrderColumnName(sorter.field)
     setOrderBy(sorter.order)
@@ -94,6 +111,11 @@ export default function UserDashboard() {
   }
 
   const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
+    dispatch(
+      {
+        type: RELOAD
+      }
+    )
     setOrderBy(OrderBy);
     setCurrentPage(pageNumber);
     setOrderColumnName(ColumnName);
@@ -172,7 +194,7 @@ export default function UserDashboard() {
             okText="Yes"
             cancelText="No">
             <Button
-            danger
+              danger
               size="middle"
             >
               Delete
@@ -211,100 +233,117 @@ export default function UserDashboard() {
       sortDirections: ['ascend', 'descend', 'ascend'],
     }
   ];
-  return (
-    <div>
-      <Modal
-        visible={editUserVisible}
-        title="Edit user"
-        closable={false}
-        onOk={handleEditUserModal}
-        onCancel={hideEditUserModal}
-      >
-        <p><b>User Id: </b>{userId}</p>
-        <Form>
-          <Space direction="vertical" align="end">
-            <Space align="baseline">
-              <Text>First Name</Text>
-              <Form.Item>
-                <input
-                  type="text"
-                  value={FirstName}
-                  placeholder="First Name"
-                  onChange={event => setFirstName(event.target.value)}
-                />
-              </Form.Item>
-            </Space>
-            <Space align="baseline">
-              <Text>Last Name</Text>
-              <Form.Item>
-                <input
-                  type="text"
-                  value={LastName}
-                  placeholder="Last Name"
-                  onChange={event => setLastName(event.target.value)}
-                />
-              </Form.Item>
-            </Space>
-            <Space align="baseline">
-              <Form.Item>
-                <Text>Email </Text>
-                <input
-                  type="text"
-                  value={Email}
-                  placeholder="Email"
-                  onChange={event => setEmail(event.target.value)}
-                />
-              </Form.Item>
-            </Space>
-            <Space align="baseline">
-              <Text>Age</Text>
-              <Form.Item>
-                <input
-                  type="number"
-                  value={Age}
-                  placeholder="Age"
-                  onChange={event => setAge(event.target.value)}
-                />
-              </Form.Item>
-            </Space>
-          </Space>
-        </Form>
-      </Modal>
-      <Search placeholder="search by email:" allowClear onSearch={(string) => {
-        //setSearchString(string);
-        handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
-        //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
+
+  const state = useSelector(
+    (state) => {
+      return {
+        authorized: state.authentication.authorized,
+        isAdmin: state.authentication.isAdmin
       }
-      } style={{ width: 200 }} />
+    }
+  )
+  const isAdmin = state.isAdmin
 
-      <Table
-        dataSource={userList}
-        columns={dashboardColumns}
-        pagination={false}
-        onChange={handleSorting}
-        onExpand={(expanded, record) => { handleExpand(expanded, record);}}
-        rowKey="id"
-        expandedRowKeys={expandedKey}
-        expandable={
-          {
-            expandedRowRender: (record) =>
-              <Table
-                dataSource={record.userCourses}
-                columns={expandedColumns}
-                pagination={false}
-                bordered
+  return (
+    <>
+      {isAdmin ? <div>
+        <Modal
+          visible={editUserVisible}
+          title="Edit user"
+          closable={false}
+          onOk={handleEditUserModal}
+          onCancel={hideEditUserModal}
+        ><br />
+          <Form>
+            <Space direction="vertical" align="start">
+              <Space direction="vertical">
+                <Text>First Name</Text>
+                <Form.Item>
+                  <Input
+                    type="text"
+                    value={FirstName}
+                    placeholder="First Name"
+                    onChange={event => setFirstName(event.target.value)}
+                    style={{ width: '400px' }}
+                  />
+                </Form.Item>
+              </Space>
+              <Space direction="vertical">
+                <Text>Last Name</Text>
+                <Form.Item>
+                  <Input
+                    type="text"
+                    value={LastName}
+                    placeholder="Last Name"
+                    onChange={event => setLastName(event.target.value)}
+                    style={{ width: '400px' }}
+                  />
+                </Form.Item>
+              </Space>
+              <Space direction="vertical">
+                <Text>Email </Text>
+                <Form.Item>
 
-              />
-          }
+                  <Input
+                    type="text"
+                    value={Email}
+                    placeholder="Email"
+                    onChange={event => setEmail(event.target.value)}
+                    style={{ width: '400px' }}
+                  />
+                </Form.Item>
+              </Space>
+              <Space direction="vertical">
+                <Text>Age</Text>
+                <Form.Item>
+                  <Input
+                    type="number"
+                    value={Age}
+                    placeholder="Age"
+                    onChange={event => setAge(event.target.value)}
+                    style={{ width: '400px' }}
+                  />
+                </Form.Item>
+              </Space>
+            </Space>
+          </Form>
+        </Modal><br/>
+        <Search placeholder="search by email:" allowClear onSearch={(string) => {
+          //setSearchString(string);
+          handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
+          //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
         }
+        } style={{ width: 200 }} /><br/><br />
+        <Spin
+          spinning={isLoading}>
+          <Table
+            dataSource={userList}
+            columns={dashboardColumns}
+            pagination={false}
+            onChange={handleSorting}
+            onExpand={(expanded, record) => { handleExpand(expanded, record); }}
+            rowKey="id"
+            expandedRowKeys={expandedKey}
+            expandable={
+              {
+                expandedRowRender: (record) =>
+                  <Table
+                    dataSource={record.userCourses}
+                    columns={expandedColumns}
+                    pagination={false}
+                    bordered
 
-      />
+                  />
+              }
+            }
 
-      <Pagination сurrent={currentPage}
-        pageSize={5}
-        total={numberOfUsers}//{store.getState().dashboard.numberOfUsers}
-        onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
-    </div>
+          /></Spin>
+
+        <Pagination сurrent={currentPage}
+          pageSize={5}
+          total={numberOfUsers}//{store.getState().dashboard.numberOfUsers}
+          onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
+      </div> : <Redirect exact to="/401" />}</>
   );
 
 }

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { apiClient } from '../../utils/API';
 import store from '../../store/store';
 import jwtDecode from 'jwt-decode';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, DatePicker, Spin, Skeleton } from 'antd';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, DatePicker, Spin, Skeleton, notification } from 'antd';
 import moment from 'moment';
 
 const CourseCard = ({ element }) => {
@@ -54,11 +54,30 @@ const CourseCard = ({ element }) => {
                 () => {
                     dispatch(get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString))
                     dispatch(get_user_subscriptions())
+                    notification.success(
+                        {
+                            message: "Success",
+                            description: "Subscribed successfully!",
+                            duration: 2
+                        }
+                    )
                 }
             )
             .finally(
                 () => {
                     setIsLoading(false)
+                }
+            )
+            .catch(
+                (error) => {
+                    console.log(error)
+                    notification.error(
+                        {
+                            message: "Error",
+                            description: "Error occured, user was not subscribed",
+                            duration: 2
+                        }
+                    )
                 }
             )
     }
@@ -74,11 +93,30 @@ const CourseCard = ({ element }) => {
                 () => {
                     dispatch(get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString))
                     dispatch(get_user_subscriptions())
+                    notification.success(
+                        {
+                            message: "Success",
+                            description: "Unsubscribed successfully!",
+                            duration: 2
+                        }
+                    )
                 }
             )
             .finally(
                 () => {
                     setIsLoading(false)
+                }
+            )
+            .catch(
+                (error) => {
+                    console.log(error)
+                    notification.error(
+                        {
+                            message: "Error",
+                            description: "Error occured, user was not unsubscribed",
+                            duration: 2
+                        }
+                    )
                 }
             )
     }
@@ -91,7 +129,7 @@ const CourseCard = ({ element }) => {
                 title={element.courseName}
                 style={{
                     width: '90%',
-                    height: 500
+                    height: 500,
                 }
                 }
                 cover={
@@ -99,15 +137,14 @@ const CourseCard = ({ element }) => {
                     <Image
                         alt={element.id}
                         src={element.courseImgUrl}
-                        //height={"70%"}
                         width={"80%"}
                         preview={false}
                     />
                 }
             >
+                <div>
                 <Space direction="vertical">
                     {element.courseDescription}
-                    <Space align="end"></Space>
                     {isSubscribed(element.id) ?
                         <Popconfirm
                             title="Unsubscribe from course?"
@@ -137,7 +174,9 @@ const CourseCard = ({ element }) => {
                             </Button>
                         </>
                     }
+                    
                 </Space>
+                </div>
             </Card>
         </Spin>
     )

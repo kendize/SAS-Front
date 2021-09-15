@@ -8,11 +8,12 @@ import store from '../../store/store';
 import jwtDecode from 'jwt-decode';
 import CourseCard from './CourseCard';
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
+import { Redirect } from 'react-router';
 export default function Courses() {
     const dispatch = useDispatch();
     const antIcon = <SyncOutlined style={{ fontSize: 36 }} spin />;
     const courseList = useSelector((store) => store.dashboard.courseList);
-    const isLoading = useSelector((store) => store.dashboard.loading);
+    const isLoading = useSelector((store) => store.dashboard.coursesLoading);
     const [Data, setData] = useState(courseList);
     const [currentPage, setCurrentPage] = useState(1)
     const [numberOfCourses, setNumberOfCourses] = useState(1)
@@ -21,6 +22,13 @@ export default function Courses() {
     const [pageSize, setPageSize] = useState(100)
     const [searchString, setSearchString] = useState("")
     //const [isLoading, setIsLoading] = useState(true)
+    const state = useSelector(
+        (state) => {
+            return {
+                authorized: state.authentication.authorized,
+            }
+        }
+    )
     const userCourse = useSelector(
         (state) => {
             return {
@@ -28,16 +36,12 @@ export default function Courses() {
             }
         }
     )
-
+    const auth = state.authorized
     const isSubscribed = (courseId) => {
         return [...userCourse.userCourse].some(
             element => element.courseId == courseId
         );
     }
-
-
-
-
 
     const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
 
@@ -46,9 +50,8 @@ export default function Courses() {
         setOrderColumnName(ColumnName);
         setSearchString(SearchString);
         dispatch(get_page_of_courses(pageNumber, pageSize, ColumnName, OrderBy, SearchString));
-        //setNumberOfUsers(store.getState().dashboard.numberOfUsers)// ?
         setData(courseList);
-        //console.log("Current Page: " + pageNumber)
+  
 
 
     }
@@ -57,7 +60,6 @@ export default function Courses() {
 
         dispatch(get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString));
         dispatch(get_user_subscriptions());
-        console.log(jwtDecode(localStorage.getItem("accessToken"))['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'])
     }, [])
 
     useEffect(() => {
@@ -68,35 +70,36 @@ export default function Courses() {
 
 
     return (
-        <div>
-            <br/>
-            <Spin 
-            indicator={antIcon}
-            size="large"
-            spinning={isLoading}>
-                <Row gutter={[16, 16]}
+        <div>{auth ?
+            <>
+                <br />
+                <Spin
+                    indicator={antIcon}
+                    size="large"
+                    spinning={isLoading}>
+                    <Row gutter={[16, 16]}
                     //type="flex"
-                    align="middle"
-                //justify="space-around"
-                >
-                    
-                    {
-                        
-                        courseList.map((element) => {
-                            return (
-                                <Col span={6} align="center">
+                    //justify="space-around"
+                    >
 
-                                    <CourseCard
-                                        element={element}
-                                        loading={isLoading} />
+                        {
 
-                                </Col>
+                            courseList.map((element) => {
+                                return (
+                                    <Col span={6} align="center">
 
-                            )
-                        })
-                    }
-                </Row>
-            </Spin>
+                                        <CourseCard
+                                            element={element}
+                                            loading={isLoading}
+                                        />
+
+                                    </Col>
+
+                                )
+                            })
+                        }
+                    </Row>
+                </Spin> </> : <Redirect exact to="/" />}
         </div>
     )
 }
