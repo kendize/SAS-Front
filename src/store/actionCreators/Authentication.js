@@ -53,7 +53,8 @@ export const relogin = (refreshToken) => {
 export const logout = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
-  localStorage.removeItem("Role")
+  localStorage.removeItem("age")
+  localStorage.removeItem("email")
   return {
     type: LOGOUT,
     authorized: false

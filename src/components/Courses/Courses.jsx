@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, Spin } from 'antd';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, Spin, Divider } from 'antd';
 import { get_page_of_courses } from '../../store/actionCreators/Dashboard';
 import { get_user_subscriptions } from '../../store/actionCreators/UserCourse';
 import { useDispatch, useSelector } from 'react-redux';
@@ -77,7 +77,7 @@ export default function Courses() {
                     indicator={antIcon}
                     size="large"
                     spinning={isLoading}>
-                    <Row gutter={[16, 16]}
+                    <Row gutter={[0, 24]}
                     //type="flex"
                     //justify="space-around"
                     >
@@ -100,6 +100,7 @@ export default function Courses() {
                         }
                     </Row>
                 </Spin> </> : <Redirect exact to="/" />}
+                <Divider></Divider>
         </div>
     )
 }

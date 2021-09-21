@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Spin } from 'antd';
+import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Row, Col, Space, Modal, Typography, Image, Spin } from 'antd';
 import { get_page_of_courses } from '../../store/actionCreators/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiClient } from '../../utils/API';
@@ -12,6 +13,7 @@ const { TextArea } = Input;
 const { Text } = Typography;
 
 export default function CourseDashboard() {
+    const antIcon = <SyncOutlined style={{ fontSize: 36 }} spin />;
     const dispatch = useDispatch();
     const courseList = useSelector((store) => store.dashboard.courseList);
     const [Data, setData] = useState(courseList);
@@ -68,9 +70,9 @@ export default function CourseDashboard() {
     const handleEditCourseModal = () => {
         dispatch(
             {
-              type: RELOAD
+                type: RELOAD
             }
-          )
+        )
         apiClient.put("https://localhost:44349/api/course", { id: courseId, coursename: courseName, courseDescription: courseDescription, courseImgUrl: courseImgUrl }, {
             "Content-Type": "application/json"
         })
@@ -88,9 +90,9 @@ export default function CourseDashboard() {
     const handleCreateCourseModal = () => {
         dispatch(
             {
-              type: RELOAD
+                type: RELOAD
             }
-          )
+        )
         apiClient.post("https://localhost:44349/api/course", { coursename: courseName, courseDescription: courseDescription, courseImgUrl: courseImgUrl }, {
             "Content-Type": "application/json"
         })
@@ -108,9 +110,9 @@ export default function CourseDashboard() {
     const handleDelete = (id) => {
         dispatch(
             {
-              type: RELOAD
+                type: RELOAD
             }
-          )
+        )
         apiClient.delete(`https://localhost:44349/api/course/${id}`).finally(() => {
             console.log(id);
             setCurrentPage(1);
@@ -124,9 +126,9 @@ export default function CourseDashboard() {
     const handleSorting = (pagination, filters, sorter) => {
         dispatch(
             {
-              type: RELOAD
+                type: RELOAD
             }
-          )
+        )
         setOrderColumnName(sorter.field)
         setOrderBy(sorter.order)
         dispatch(get_page_of_courses(currentPage, pageSize, sorter.field, sorter.order, searchString))
@@ -138,9 +140,9 @@ export default function CourseDashboard() {
     const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
         dispatch(
             {
-              type: RELOAD
+                type: RELOAD
             }
-          )
+        )
         setOrderBy(OrderBy);
         setCurrentPage(pageNumber);
         setOrderColumnName(ColumnName);
@@ -168,7 +170,8 @@ export default function CourseDashboard() {
             dataIndex: 'courseName',
             key: 'courseName',
             sorter: true,
-            sortDirections: ['ascend', 'descend', 'ascend']
+            sortDirections: ['ascend', 'descend', 'ascend'],
+            width: "75%"
         },
 
         {
@@ -220,7 +223,7 @@ export default function CourseDashboard() {
                     closable={false}
                     onCancel={hideEditCourseModal}
                     onOk={handleEditCourseModal}
-                    
+
                 >
                     <Form>
                         <Space direction="vertical" align="start">
@@ -286,7 +289,7 @@ export default function CourseDashboard() {
                                     />
                                 </Form.Item>
                             </Space>
-                            <Space  direction="vertical">
+                            <Space direction="vertical">
                                 <Text>Course Description</Text>
                                 <Form.Item>
                                     <Input
@@ -298,7 +301,7 @@ export default function CourseDashboard() {
                                     />
                                 </Form.Item>
                             </Space>
-                            <Space  direction="vertical">
+                            <Space direction="vertical">
                                 <Form.Item>
                                     <Text>Course Image URL</Text>
                                     <TextArea
@@ -314,53 +317,58 @@ export default function CourseDashboard() {
                         </Space>
                     </Form>
                 </Modal>
-                <br/>
-                <Search placeholder="search by name:" allowClear onSearch={(string) => {
-                    //setSearchString(string);
-                    handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
-                    //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
-                }
-                } style={{ width: 200 }} /><br/><br />
-                <Spin
-                    spinning={isLoading}>
-                    <Table
-                        dataSource={courseList}
-                        columns={dashboardColumns}
-                        pagination={false}
-                        onChange={handleSorting}
-                        onExpand={(expanded, record) => { handleExpand(expanded, record); console.log(store.getState().authentication.authorized) }}
-                        rowKey="id"
-                        expandedRowKeys={expandedKey}
-                        expandable={
-                            {
-                                expandedRowRender: (record) =>
-                                    <div>
-                                        <Image
-                                            width={200}
-                                            src={record.courseImgUrl}
-                                        />
-                                        <p>
-                                            <b>Description:</b>
-                                            {record.courseDescription}</p>
-                                    </div>
+                <Row>
+                    <Col offset={1} span={22}>
+                        <Search placeholder="Search by Name:" allowClear onSearch={(string) => {
+                            handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
+                        }}
+                            style={{ width: 200 }} /><br /><br />
+                        <Spin
+                            indicator={antIcon}
+                            size="large"
+                            spinning={isLoading}>
+                            <Table
+                                dataSource={courseList}
+                                columns={dashboardColumns}
+                                pagination={false}
+                                onChange={handleSorting}
+                                onExpand={(expanded, record) => { handleExpand(expanded, record); console.log(store.getState().authentication.authorized) }}
+                                rowKey="id"
+                                expandedRowKeys={expandedKey}
+                                expandable={
+                                    {
+                                        expandedRowRender: (record) =>
+                                            <div>
+                                                <Image
+                                                    width={300}
+                                                    src={record.courseImgUrl}
+                                                />
+                                                <p>
+                                                    <h4><b>Description: </b>
+                                                    {record.courseDescription}</h4></p>
+                                            </div>
 
-                            }
-                        }
+                                    }
+                                }
 
-                    /></Spin>
-                <Space align="end">
-                    <Pagination сurrent={currentPage}
-                        pageSize={5}
-                        total={numberOfCourses}//{store.getState().dashboard.numberOfUsers}
-                        onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
-                    <Button
-                        size="middle"
-                        type="primary"
-                        onClick={() => showCreateCourseModal()}
-                    >
-                        Create course
-                    </Button>
-                </Space>
+                            />
+                        </Spin>
+                        <br />
+                        <Space align="end">
+
+                            <Pagination сurrent={currentPage}
+                                pageSize={5}
+                                total={numberOfCourses}
+                                onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
+                            <Button
+                                size="middle"
+                                type="primary"
+                                onClick={() => showCreateCourseModal()}
+                            >
+                                Create course
+                            </Button>
+                        </Space></Col>
+                </Row>
             </div> : <Redirect exact to="/401" />}</>
     );
 

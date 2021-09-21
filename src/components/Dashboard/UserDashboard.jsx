@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Spin } from 'antd';
+import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Spin, Select, Divider, Row } from 'antd';
 import { get_page_of_users } from '../../store/actionCreators/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiClient } from '../../utils/API';
@@ -9,9 +10,10 @@ import { isAdmin } from '../../utils';
 import { RELOAD } from '../../store/actions';
 const { Search } = Input;
 const { Text } = Typography;
-
+const { Option } = Select;
 
 export default function UserDashboard() {
+  const antIcon = <SyncOutlined style={{ fontSize: 36 }} spin />;
   const dispatch = useDispatch();
   const userList = useSelector((store) => store.dashboard.userList);
   const [Data, setData] = useState(userList);
@@ -21,6 +23,7 @@ export default function UserDashboard() {
   const [orderBy, setOrderBy] = useState("ascend")
   const [pageSize, setPageSize] = useState(5)
   const [searchString, setSearchString] = useState("")
+  const [searchColumn, setSearchColumn] = useState("FirstName")
 
   const [editUserVisible, setEditUserVisible] = useState(false);
 
@@ -31,6 +34,10 @@ export default function UserDashboard() {
   const [Age, setAge] = useState("")
   const isLoading = useSelector((store) => store.dashboard.usersLoading);
   const [expandedKey, setExpandedKey] = useState([])
+
+  const changeSearchColumn = (value) => {
+    setSearchColumn(value)
+  }
 
   const handleExpand = (expanded, record) => {
     if (expanded) {
@@ -61,13 +68,19 @@ export default function UserDashboard() {
         type: RELOAD
       }
     )
-    apiClient.put("https://localhost:44349/api/admin", { id: userId, firstname: FirstName, lastname: LastName, age: Age, email: Email }, {
+    apiClient.put("https://localhost:44349/api/admin", {
+      id: userId,
+      firstname: FirstName,
+      lastname: LastName,
+      age: Age,
+      email: Email
+    }, {
       "Content-Type": "application/json"
     })
       .then(function (response) {
         console.log(response);
         setEditUserVisible(false);
-        dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString));
+        dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString, searchColumn));
       })
       .catch(function (error) {
         console.log(error);
@@ -90,7 +103,7 @@ export default function UserDashboard() {
       })
       .finally(() => {
         setCurrentPage(1);
-        dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString));
+        dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString, searchColumn));
         setNumberOfUsers(store.getState().dashboard.numberOfUsers)
         setData(userList);
 
@@ -106,11 +119,11 @@ export default function UserDashboard() {
     //setCurrentPage(1);
     setOrderColumnName(sorter.field)
     setOrderBy(sorter.order)
-    dispatch(get_page_of_users(currentPage, pageSize, sorter.field, sorter.order, searchString))
+    dispatch(get_page_of_users(currentPage, pageSize, sorter.field, sorter.order, searchString, searchColumn))
 
   }
 
-  const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString) => {
+  const handleChangeOfPage = (pageNumber, ColumnName, OrderBy, SearchString, SearchColumn) => {
     dispatch(
       {
         type: RELOAD
@@ -120,7 +133,8 @@ export default function UserDashboard() {
     setCurrentPage(pageNumber);
     setOrderColumnName(ColumnName);
     setSearchString(SearchString);
-    dispatch(get_page_of_users(pageNumber, pageSize, ColumnName, OrderBy, SearchString));
+    setSearchColumn(SearchColumn);
+    dispatch(get_page_of_users(pageNumber, pageSize, ColumnName, OrderBy, SearchString, SearchColumn));
     //setNumberOfUsers(store.getState().dashboard.numberOfUsers)// ?
     setData(userList);
     //console.log("Current Page: " + pageNumber)
@@ -128,7 +142,7 @@ export default function UserDashboard() {
   }
 
   useEffect(() => {
-    dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString));
+    dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString, searchColumn));
   }, [])
 
   useEffect(() => {
@@ -207,13 +221,13 @@ export default function UserDashboard() {
   ];
 
   const expandedColumns = [
-    {
-      title: "Course Id",
-      dataIndex: 'courseId',
-      key: 'id',
-      sortDirections: ['ascend', 'descend', 'ascend'],
-      render: (record) => <p>{record}</p>
-    },
+    //{
+    //  title: "Course Id",
+    //  dataIndex: 'courseId',
+    //  key: 'id',
+    //  sortDirections: ['ascend', 'descend', 'ascend'],
+    //  render: (record) => <p>{record}</p>
+    //},
     {
       title: "Course name",
       dataIndex: ["course", "courseName"],
@@ -231,6 +245,7 @@ export default function UserDashboard() {
       dataIndex: "studyDate",
       key: 'courseName',
       sortDirections: ['ascend', 'descend', 'ascend'],
+      render: (record) => record.split('T')[0]
     }
   ];
 
@@ -307,14 +322,30 @@ export default function UserDashboard() {
               </Space>
             </Space>
           </Form>
-        </Modal><br/>
-        <Search placeholder="search by email:" allowClear onSearch={(string) => {
+        </Modal>
+
+        <Row>
+          <Col offset = {1} span = {22}>
+        <Select
+          labelInValue
+          defaultValue={{ value: searchColumn }}
+          style={{ width: 120 }}
+          onChange={(value) => changeSearchColumn(value.value)}
+        >
+          <Option value="FirstName">First Name</Option>
+          <Option value="LastName">Last Name</Option>
+          <Option value="Email">Email</Option>
+        </Select>
+        <Divider type="vertical"></Divider>
+        <Search placeholder="Search" allowClear onSearch={(string) => {
           //setSearchString(string);
-          handleChangeOfPage(currentPage, orderColumnName, orderBy, string)
+          handleChangeOfPage(currentPage, orderColumnName, orderBy, string, searchColumn)
           //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
         }
-        } style={{ width: 200 }} /><br/><br />
+        } style={{ width: 200 }} /><br /><br />
         <Spin
+          indicator={antIcon}
+          size="large"
           spinning={isLoading}>
           <Table
             dataSource={userList}
@@ -326,6 +357,8 @@ export default function UserDashboard() {
             expandedRowKeys={expandedKey}
             expandable={
               {
+
+                rowExpandable: record => record.userCourses.length != 0,
                 expandedRowRender: (record) =>
                   <Table
                     dataSource={record.userCourses}
@@ -338,11 +371,13 @@ export default function UserDashboard() {
             }
 
           /></Spin>
-
+        <br />
         <Pagination сurrent={currentPage}
           pageSize={5}
           total={numberOfUsers}//{store.getState().dashboard.numberOfUsers}
           onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
+          </Col>
+          </Row>
       </div> : <Redirect exact to="/401" />}</>
   );
 

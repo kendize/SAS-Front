@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Form, Button, notification, Space, Input, Card, message } from 'antd';
 import { useHistory } from "react-router-dom";
 import accountService from '../../services/accountService';
+import { SendOutlined } from '@ant-design/icons';
+
 export default function Registration() {
   const history = useHistory();
   const [Email, setEmail] = useState("");
@@ -25,13 +27,15 @@ export default function Registration() {
         notification.success(
           {
             message: "Success",
-            description: "Successfully registrated!"
+            description: "Successfully registrated!",
+            placement: 'bottomRight'
           }
         );
         notification.info(
           {
             message: "Confirm your E-Mail",
-            description: "Check your E-Mail for activation of profile!"
+            description: "Check your E-Mail for activation of profile!",
+            placement: 'bottomRight'
           }
         )
         history.push("/")
@@ -51,10 +55,15 @@ export default function Registration() {
   return (
 
     <div align="center">
-      <Card style={{ width: "500px" }}>
-        <Form scrollToFirstError>
+      <Card style={{ width: "35%", borderRadius: "25px" }}>
+      <h3>Registration</h3>
+        <Form scrollToFirstError
+        labelCol={{ span: 5}}
+        wrapperCol={{ span: 16, }}>
+          
           <Form.Item
             name="email"
+            label = "Email"
             rules={
               [
                 {
@@ -75,6 +84,7 @@ export default function Registration() {
           </Form.Item>
           <Form.Item
             name="password"
+            label = "Password"
             type="password"
             rules={
               [
@@ -97,7 +107,17 @@ export default function Registration() {
             />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item
+          name = "first name"
+          label = "First Name"
+          rules={
+            [
+              {
+                required: true,
+                message: "Please, input First Name!"
+              }
+            ]
+          }>
             <Input
               type="text"
               value={FirstName}
@@ -107,7 +127,17 @@ export default function Registration() {
             />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item
+          name = "last name"
+          label = "Last Name"
+          rules={
+            [
+              {
+                required: true,
+                message: "Please, input Last Name!"
+              }
+            ]
+          }>
             <Input
               type="text"
               value={LastName}
@@ -117,7 +147,17 @@ export default function Registration() {
             />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item
+          name = "age"
+          label = "Age"
+          rules={
+            [
+              {
+                required: true,
+                message: "Please, input Age!"
+              }
+            ]
+          }>
             <Input
               type="number"
               value={Age}
@@ -126,19 +166,22 @@ export default function Registration() {
               style={{ width: '80%' }}
             />
           </Form.Item>
-
+          <Space>
           <Form.Item>
             <Button
-              style={{ background: "#32CD32", borderColor: "black", width: '50%' }}
+              style={{ borderColor: "black", width : '150px' }}
               size="middle"
               type="primary"
               onClick={handleSubmit}
             >
+              <SendOutlined />
               Register
             </Button>
           </Form.Item>
+          </Space>
         </Form>
       </Card>
+      <br/>
     </div>
   );
 }

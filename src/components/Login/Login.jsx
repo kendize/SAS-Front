@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Form, Button, notification, Input, Card } from 'antd';
+import { Form, Button, notification, Input, Card, Space } from 'antd';
 import { useDispatch } from 'react-redux';
 import { LOGIN } from '../../store/actions';
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { apiClient } from '../../utils/API';
 import { createFromIconfontCN } from '@ant-design/icons';
 import authenticationService from '../../services/authenticationService';
-import { FacebookOutlined } from '@ant-design/icons';
+import { FacebookOutlined, LoginOutlined } from '@ant-design/icons';
 import jwtDecode from 'jwt-decode';
 import { isAdmin } from '../../utils';
 export default function Login() {
@@ -29,6 +29,8 @@ export default function Login() {
         (response) => {
           localStorage.setItem("accessToken", response.data.accessToken);
           localStorage.setItem("refreshToken", response.data.refreshToken);
+          localStorage.setItem("email", response.data.email);
+          localStorage.setItem("age", response.data.age)
           dispatch({
             type: LOGIN,
             payload: response.data,
@@ -40,7 +42,8 @@ export default function Login() {
             {
               message: "Success",
               description: "Authenticated via Facebook!",
-              duration: 2
+              duration: 2,
+              placement: 'bottomRight'
             }
           )
           history.push('/')
@@ -54,6 +57,8 @@ export default function Login() {
         (response) => {
           localStorage.setItem("accessToken", response.data.accessToken);
           localStorage.setItem("refreshToken", response.data.refreshToken);
+          localStorage.setItem("email", response.data.email);
+          localStorage.setItem("age", response.data.age)
           dispatch({
             type: LOGIN,
             payload: response.data,
@@ -65,7 +70,8 @@ export default function Login() {
             {
               message: "Success",
               description: "Successfully authenticated!",
-              duration: 2
+              duration: 2,
+              placement: 'bottomRight'
             }
           )
         })
@@ -75,7 +81,8 @@ export default function Login() {
           {
             message: "Error",
             description: "Wrong Email or Password",
-            duration: 2
+            duration: 2,
+            placement: 'bottomRight'
           }
         )
       });
@@ -83,53 +90,67 @@ export default function Login() {
 
   return (
     <div align="center">
-      <Card style={{ width: "500px" }}>
-        <Form>
-          <Form.Item>
+      <Card style={{ width: "35%", borderRadius: "25px" }}>
+        <h3>Sign In to <b>SAS</b></h3>
+        <h5>New here? <Link to="/Registration">Register now!</Link></h5>
+        <Form
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 16, }}
+          autoComplete="off">
+          <Form.Item label="Email"
+            name="email"
+            rules={[{ required: true, message: 'Please input your E-Mail!' },]}>
             <Input
               type="text"
               value={Email}
               placeholder="Email"
               onChange={event => setEmail(event.target.value)}
-              style={{ width: '80%' }}
+            //style={{ width: '80%' }}
             />
           </Form.Item>
 
-          <Form.Item>
-            <Input
+          <Form.Item label="Password"
+            rules={[{ required: true, message: 'Please input your Password!' }]}
+            name="password">
+            <Input.Password
               type="password"
               value={Password}
               placeholder="Password"
               onChange={event => setPassword(event.target.value)}
-              style={{ width: '80%' }}
+
+            //style={{ width: '80%' }}
             />
           </Form.Item>
+          <Space direction="horizontal" align="baseline" size="middle">
+            <Form.Item>
+              <Button
+                size="middle"
+                type="primary"
+                onClick={handleSubmit}
+              //style={{  borderColor: "black", width: '80%'}}
+              >
 
-          <Form.Item>
-            <Button
-              size="middle"
-              type="primary"
-              onClick={handleSubmit}
-              style={{ background: "#32CD32", borderColor: "black" , width: '50%'}}
-            >
-              Login
-            </Button>
-          </Form.Item>
-          <p>or</p>
-          <Form.Item>
-            <Button
-              size="middle"
-              type="primary"
-              onClick={() => handleFacebookLogin()}
-              style={{ width: '50%' }}
-            >
-              <IconFont type="icon-facebook" style={{ fontSize: 22 }} />
+                <LoginOutlined style={{ fontSize: 22 }} />
+                Login
+              </Button>
+            </Form.Item>
+            or
+            <Form.Item>
+              <Button
+                size="middle"
+                type="primary"
+                onClick={() => handleFacebookLogin()}
+              //style={{ width: '80%' }}
+              >
 
-              Facebook
-            </Button>
-          </Form.Item>
+                <FacebookOutlined style={{ fontSize: 22 }} />
+                Facebook
+              </Button>
+            </Form.Item>
+          </Space>
         </Form>
       </Card>
+      <br />
     </div>
   );
 }

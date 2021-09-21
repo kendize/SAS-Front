@@ -15,13 +15,7 @@ const EmailConfirmation = () => {
                             description: "Email Confirmed!"
                         }
                     )
-                    //return (
-                    //    <p>
-                    //        {userid}//
-                    //        {code}
-                    //        <p>Email Confirmed?</p>
-                    //    </p>
-                    //)
+                    
                     return (
                         <Redirect exact to="/" />
 

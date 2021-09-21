@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { get_page_of_courses } from '../../store/actionCreators/Dashboard';
 import { get_user_subscriptions } from '../../store/actionCreators/UserCourse';
 import { useDispatch, useSelector } from 'react-redux';
-import { apiClient } from '../../utils/API';
-import store from '../../store/store';
-import jwtDecode from 'jwt-decode';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, DatePicker, Spin, Skeleton, notification } from 'antd';
+import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, DatePicker, Spin, Skeleton, notification, Divider } from 'antd';
 import moment from 'moment';
+import subscriptionService from '../../services/subscriptionService';
 
 const CourseCard = ({ element }) => {
+    const antIcon = <SyncOutlined style={{ fontSize: 36 }} spin />;
     const [date, setDate] = useState("")
     const dispatch = useDispatch();
     const courseList = useSelector((store) => store.dashboard.courseList);
@@ -20,6 +20,7 @@ const CourseCard = ({ element }) => {
     const [pageSize, setPageSize] = useState(100)
     const [searchString, setSearchString] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+
     const userCourse = useSelector(
         (state) => {
             return {
@@ -28,37 +29,35 @@ const CourseCard = ({ element }) => {
         }
     )
 
-    useEffect(() => { console.log(date) }, [])
+
     const isSubscribed = (courseId) => {
         return [...userCourse.userCourse].some(
             element => element.courseId == courseId
         );
     }
 
+    const subscriptionDate = (id) => {
+        return [...userCourse.userCourse].find(element => element.courseId == id).studyDate
+    }
     const handleSubscribe = (courseId, studyDate) => {
         setIsLoading(true)
-        apiClient.post("/api/subscription/subscribe",
-            {
-                headers: {
-                    "Accept": "application/json",
-                    'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
-                },
-
-                CourseId: courseId,
-                StudyDate: studyDate
-
-            },
-            //{ "Content-Type": "application/json" }
-        )
+        const response = subscriptionService.handleSubscribe(courseId, studyDate)
             .then(
                 () => {
-                    dispatch(get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString))
-                    dispatch(get_user_subscriptions())
+                    dispatch(
+                        get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString)
+                    )
+
+                    dispatch(
+                        get_user_subscriptions()
+                    )
+
                     notification.success(
                         {
                             message: "Success",
                             description: "Subscribed successfully!",
-                            duration: 2
+                            duration: 2,
+                            placement: 'bottomRight'
                         }
                     )
                 }
@@ -75,7 +74,8 @@ const CourseCard = ({ element }) => {
                         {
                             message: "Error",
                             description: "Error occured, user was not subscribed",
-                            duration: 2
+                            duration: 2,
+                            placement: 'bottomRight'
                         }
                     )
                 }
@@ -84,20 +84,21 @@ const CourseCard = ({ element }) => {
 
     const handleUnSubscribe = (courseId) => {
         setIsLoading(true)
-        apiClient.post("/api/subscription/unsubscribe",
-            {
-                CourseId: courseId
-            },
-            { "Content-Type": "application/json" })
+        const response = subscriptionService.handleUnsubscribe(courseId)
             .then(
                 () => {
-                    dispatch(get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString))
-                    dispatch(get_user_subscriptions())
+                    dispatch(
+                        get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString)
+                        )
+                    dispatch(
+                        get_user_subscriptions()
+                        )
                     notification.success(
                         {
                             message: "Success",
                             description: "Unsubscribed successfully!",
-                            duration: 2
+                            duration: 2,
+                            placement: 'bottomRight'
                         }
                     )
                 }
@@ -114,7 +115,8 @@ const CourseCard = ({ element }) => {
                         {
                             message: "Error",
                             description: "Error occured, user was not unsubscribed",
-                            duration: 2
+                            duration: 2,
+                            placement: 'bottomRight'
                         }
                     )
                 }
@@ -129,7 +131,8 @@ const CourseCard = ({ element }) => {
                 title={element.courseName}
                 style={{
                     width: '90%',
-                    height: 500,
+                    height: 480,
+                    borderRadius: "25px"
                 }
                 }
                 cover={
@@ -139,43 +142,51 @@ const CourseCard = ({ element }) => {
                         src={element.courseImgUrl}
                         width={"80%"}
                         preview={false}
+                        placeholder = {
+                            <Spin indicator={antIcon}
+                            size="large"></Spin>
+                        }
                     />
                 }
             >
                 <div>
-                <Space direction="vertical">
-                    {element.courseDescription}
-                    {isSubscribed(element.id) ?
-                        <Popconfirm
-                            title="Unsubscribe from course?"
-                            onConfirm={() => handleUnSubscribe(element.id)}
-                            onCancel={(e) => console.log(e)}//onClick={() => handleDelete(record.id)}
-                            okText="Yes"
-                            cancelText="No">
-                            <Button
-                                danger
-                                size="middle"
-                            >
-                                Unsubscribe
-                            </Button>
-                        </Popconfirm>
-                        :
-                        <>
-                            <DatePicker
-                                onChange={(date, dateString) => { setDate(dateString) }}
-                            //format={}
-                            />
-                            <Button
-                                size="middle"
-                                type="primary"
-                                onClick={() => handleSubscribe(element.id, moment(date).format())}
-                            >
-                                Subscribe
-                            </Button>
-                        </>
-                    }
-                    
-                </Space>
+                    <Space direction="vertical">
+                        {element.courseDescription}
+                        {isSubscribed(element.id) ?
+                            <>
+
+                                <h4>Study Date: {subscriptionDate(element.id).split(' ')[0]}</h4>
+
+
+                                <Popconfirm
+                                    title="Unsubscribe from course?"
+                                    onConfirm={() => handleUnSubscribe(element.id)}
+                                    okText="Yes"
+                                    cancelText="No">
+                                    <Button
+                                        danger
+                                        size="middle"
+                                    >
+                                        Unsubscribe
+                                    </Button>
+                                </Popconfirm>
+                            </>
+                            :
+                            <>
+                                <DatePicker
+                                    onChange={(date, dateString) => { setDate(dateString) }}
+                                />
+                                <Button
+                                    size="middle"
+                                    type="primary"
+                                    onClick={() => handleSubscribe(element.id, moment(date).format())}
+                                >
+                                    Subscribe
+                                </Button>
+                            </>
+                        }
+
+                    </Space>
                 </div>
             </Card>
         </Spin>

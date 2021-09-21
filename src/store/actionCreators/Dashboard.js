@@ -1,7 +1,7 @@
 import { apiClient } from "../../utils/API";
 import { GET_PAGE_OF_USERS, GET_PAGE_OF_COURSES, RELOAD } from "../actions";
 
-export const get_page_of_users = (pageNumber, pageSize, orderColumnName, orderBy, searchString) => {
+export const get_page_of_users = (pageNumber, pageSize, orderColumnName, orderBy, searchString, searchColumn) => {
   return async (dispatch) => {
     await apiClient.get(`api/admin/`,
       {
@@ -15,7 +15,8 @@ export const get_page_of_users = (pageNumber, pageSize, orderColumnName, orderBy
           pageSize: pageSize,
           orderColumnName: orderColumnName,
           orderBy: orderBy,
-          searchString: searchString
+          searchString: searchString,
+          searchColumn: searchColumn
         }
 
       })
@@ -34,7 +35,7 @@ export const get_page_of_users = (pageNumber, pageSize, orderColumnName, orderBy
   };
 }
 
-export const get_page_of_courses = (pageNumber, pageSize, orderColumnName, orderBy, searchString) => {
+export const get_page_of_courses = (pageNumber, pageSize, orderColumnName, orderBy, searchString, searchColumn) => {
   return async (dispatch) => {
     await apiClient.get(`api/course/`,
       {
@@ -48,7 +49,8 @@ export const get_page_of_courses = (pageNumber, pageSize, orderColumnName, order
           pageSize: pageSize,
           orderColumnName: orderColumnName,
           orderBy: orderBy,
-          searchString: searchString
+          searchString: searchString,
+          searchColumn: searchColumn
         }
 
       })

@@ -11,7 +11,7 @@ import CourseDashboard from '../Dashboard/CourseDashboard'
 import Home from '../../Home'
 import Login from '../Login/Login'
 import { useDispatch, useSelector } from 'react-redux'
-import { Breadcrumb, Button, Menu, Row, Col, Space, Card } from 'antd';
+import { Breadcrumb, Button, Menu, Row, Col, Space, Card, Divider } from 'antd';
 import { logout } from "../../store/actionCreators/Authentication";
 import PublicRoute from "../../utils/PublicRoute";
 import PrivateRoute from "../../utils/PrivateRoute";
@@ -21,6 +21,7 @@ import Courses from "../Courses/Courses";
 import EmailConfirmation from "../Profile/EmailConfirmation";
 import axios from "axios";
 import Error_401 from "../Errors/401";
+import Profile from "../Profile/Profile";
 
 const { SubMenu } = Menu;
 
@@ -46,69 +47,83 @@ const NavigationBar = () => {
     const isAdmin = state.isAdmin
 
     return (
-        <div>
+        <div  style = {{backgroundColor: '#fafafa'}}>
             <Router>
-                <Row>
-                    <Col span={12}>
-                        <Breadcrumb>
-
-                            <Breadcrumb.Item>
-                                <Link to="/">Home</Link>
-                            </Breadcrumb.Item>
-                            {auth ?
-                                <>
-                                    {isAdmin ?
-                                        <>
-                                            <Breadcrumb.Item overlay={
-                                                <Menu>
-                                                    <Menu.Item>
-                                                        <Link to="/UserDashboard">Users</Link>
-                                                    </Menu.Item>
-                                                    <Menu.Item>
-                                                        <Link to="/CourseDashboard">Courses</Link>
-                                                    </Menu.Item>
-                                                    <Menu.Item>
-                                                        <a href="https://localhost:44349/Hangfire" onClick={() => test()}>Hangfire</a>
-                                                    </Menu.Item>
-                                                </Menu>
-                                            }>
-                                                Dashboards
-
-                                            </Breadcrumb.Item>
-                                        </>
-                                        :
-                                        <span></span>}
-
-                                    <Breadcrumb.Item>
-                                        <Link to="/Courses">Courses</Link>
-                                    </Breadcrumb.Item>
-
-                                    <Breadcrumb.Item>
-                                        <Button
-                                            onClick={() => {
-                                                dispatch(logout())
-                                            }}>Logout</Button>
-                                    </Breadcrumb.Item>
-                                </>
-                                :
-                                <>
-                                    <Breadcrumb.Item>
-                                        <Link to="/Login">Authentication</Link>
-                                    </Breadcrumb.Item>
-
-                                    <Breadcrumb.Item>
-                                        <Link to="/Registration">Registration</Link>
-                                    </Breadcrumb.Item>
-                                </>
-                            }
-                        </Breadcrumb>
-                    </Col>
+                <div style = {{backgroundColor: '#2C294B', padding: '7px'}}>
                     
-                </Row>
+                    <Row align="middle">
+                    <Col offset={1} span={6}>
+                            <Menu
+                            mode = "horizontal"
+                            style = {{ backgroundColor: "#2C294B"}}
+                            theme = 'dark'
+                            selectedKeys = {[]}
+                            >
+                            
+                                <Menu.Item key = 'home'>
+                                    <Link to="/">Home</Link>
+                                </Menu.Item>
+                                {auth ?
+                                    <>
+                                        {isAdmin && 
+                                            <>
+                                                    <SubMenu key = "DashboardSubMenu" title = "Dashboard" style = {{ backgroundColor: "#2C294B"}}>
+                                                        <Menu.Item>
+                                                            <Link to="/UserDashboard">Users</Link>
+                                                        </Menu.Item>
+                                                        <Menu.Item>
+                                                            <Link to="/CourseDashboard">Courses</Link>
+                                                        </Menu.Item>
+                                                        <Menu.Item>
+                                                            <a href="https://localhost:44349/Hangfire" onClick={() => test()}>Hangfire</a>
+                                                        </Menu.Item>
+                                                    </SubMenu>
+                                            </>
+                                            }
+                                        <Menu.Item key = 'courses'>
+                                            <Link to="/Courses">Courses</Link>
+                                        </Menu.Item>
+                                    </>
+                                    :
+                                    <>
+                                        <Menu.Item key = 'login'>
+                                            <Link to="/Login">Authentication</Link>
+                                        </Menu.Item>
+
+                                        <Menu.Item key = 'registration'>
+                                            <Link to="/Registration"> Registration</Link>
+                                        </Menu.Item>
+                                    </>
+                                }
+                            </Menu>
+                        </Col>
+                        <Col offset={13}>
+                            {
+                                isLogin() ?
+                                    <Card bodyStyle={{ padding: "12px" }} style={{ borderRadius: "15px" }} hoverable>
+                                        <Space align="baseline">
+                                            <Link to="/Profile">{getFirstName() + "  " + getLastName() + "  "}</Link>
+                                            <Button
+                                                onClick={() => {
+                                                    dispatch(logout())
+                                                }}>Logout
+                                            </Button>
+                                        </Space>
+                                    </Card>
+                                    :
+                                    <span></span>
+                            }
+                        </Col>
+                    </Row>
+                    </div>
+                    <br/>
+                
+
                 <Switch>
                     <PublicRoute exact path="/" component={Home} />
                     <PrivateRoute path="/UserDashboard" component={UserDashboard} />
                     <PrivateRoute path="/CourseDashboard" component={CourseDashboard} />
+                    <PrivateRoute path="/Profile" component={Profile} />
                     <PublicRoute path="/Courses" component={Courses} />
                     <PublicRoute path="/Login" component={Login} />
                     <PublicRoute path="/Registration" component={Registration} />

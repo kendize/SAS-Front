@@ -17,7 +17,6 @@ function startApp () {
     <Provider store={store}>
     <React.StrictMode>
       <App />
-      <hr />
       <NavigationBar />
       
       
