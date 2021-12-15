@@ -21,7 +21,7 @@ export const DashboardReducer = (state = initialState, action) => {
             return {...initialState }
         }
         case RELOAD: {
-            return{... state, usersLoading: true, coursesLoading: true};
+            return{...state, usersLoading: true, coursesLoading: true};
         }
     default: {
         return state

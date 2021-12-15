@@ -1,12 +1,11 @@
-import jwtDecode from "jwt-decode";
 import { getFirstName, getLastName, isAdmin, isLogin } from "../../utils";
 import { LOGIN, LOGOUT, RELOGIN } from "../actions";
 const initialState = {
     accessToken: "",
     refreshToken: "",
     id: "",
-    firstName: getFirstName(),//http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
-    lastName: getLastName(),//http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname
+    firstName: getFirstName(),
+    lastName: getLastName(),
     isAdmin: isAdmin(),
     authorized: isLogin()
 };
@@ -25,10 +24,6 @@ export const AuthenticationReducer = (state = initialState, action) => {
             const isAdmin = false;
             return { ...initialState, authorized, isAdmin };
         }
-        //case RELOGIN: {
-        //    const  {accessToken, refreshToken, id, firstName, lastName} = action.payload;
-        //    return {...state,   accessToken, refreshToken, id, firstName, lastName}
-        //}
         default:
             {
                 return state;

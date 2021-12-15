@@ -1,12 +1,12 @@
 import { notification } from 'antd';
 import { useEffect } from 'react'
 import { Redirect, useParams } from 'react-router-dom'
-import { apiClient } from '../../utils/API'
+import accountService from '../../services/accountService';
 const EmailConfirmation = () => {
     const { userid, code } = useParams();
 
-    const ConfirmEmail = async () => {
-        apiClient.get(`/api/authentication/confirmemail?${userid}&${code}`)
+    const ConfirmEmail = () => {
+        accountService.handleEmailConfirmation(userid, code)
             .then(
                 () => {
                     notification.success(
@@ -23,9 +23,6 @@ const EmailConfirmation = () => {
                 }
             ).catch(
                 () => {
-                    //return (
-                    //    <p>error</p>
-                    //)
                     notification.error(
                         {
                             message: "Error",

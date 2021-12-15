@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, notification, Space, Input, Card, message } from 'antd';
+import { Form, Button, notification, Space, Input, Card} from 'antd';
 import { useHistory } from "react-router-dom";
 import accountService from '../../services/accountService';
 import { SendOutlined } from '@ant-design/icons';
@@ -21,7 +21,7 @@ export default function Registration() {
       password: Password
     }
 
-    const response = accountService.handleRegistration(data)
+    accountService.handleRegistration(data)
       .then((response) => {
         console.log(response);
         notification.success(
@@ -56,7 +56,7 @@ export default function Registration() {
 
     <div align="center">
       <Card style={{ width: "35%", borderRadius: "25px" }}>
-      <h3>Registration</h3>
+      <h2>Registration</h2>
         <Form scrollToFirstError
         labelCol={{ span: 5}}
         wrapperCol={{ span: 16, }}>

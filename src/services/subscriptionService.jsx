@@ -1,4 +1,3 @@
-import { notification } from "antd";
 import { apiClient } from "../utils/API";
 
 const subscriptionService = {

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { SyncOutlined } from '@ant-design/icons';
 import { get_page_of_courses } from '../../store/actionCreators/Dashboard';
 import { get_user_subscriptions } from '../../store/actionCreators/UserCourse';
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Image, Card, Row, DatePicker, Spin, Skeleton, notification, Divider } from 'antd';
+import { Button, Popconfirm, Space, Image, Card, DatePicker, Spin, notification } from 'antd';
 import moment from 'moment';
 import subscriptionService from '../../services/subscriptionService';
 
@@ -11,10 +11,7 @@ const CourseCard = ({ element }) => {
     const antIcon = <SyncOutlined style={{ fontSize: 36 }} spin />;
     const [date, setDate] = useState("")
     const dispatch = useDispatch();
-    const courseList = useSelector((store) => store.dashboard.courseList);
-    const [Data, setData] = useState(courseList);
     const [currentPage, setCurrentPage] = useState(1)
-    const [numberOfCourses, setNumberOfCourses] = useState(1)
     const [orderColumnName, setOrderColumnName] = useState("courseName")
     const [orderBy, setOrderBy] = useState("ascend")
     const [pageSize, setPageSize] = useState(100)
@@ -29,19 +26,19 @@ const CourseCard = ({ element }) => {
         }
     )
 
-
     const isSubscribed = (courseId) => {
         return [...userCourse.userCourse].some(
-            element => element.courseId == courseId
+            element => element.courseId === courseId
         );
     }
 
     const subscriptionDate = (id) => {
-        return [...userCourse.userCourse].find(element => element.courseId == id).studyDate
+        return [...userCourse.userCourse]
+            .find(element => element.courseId === id).studyDate
     }
     const handleSubscribe = (courseId, studyDate) => {
         setIsLoading(true)
-        const response = subscriptionService.handleSubscribe(courseId, studyDate)
+        subscriptionService.handleSubscribe(courseId, studyDate)
             .then(
                 () => {
                     dispatch(
@@ -70,6 +67,7 @@ const CourseCard = ({ element }) => {
             .catch(
                 (error) => {
                     console.log(error)
+                    setIsLoading(false)
                     notification.error(
                         {
                             message: "Error",
@@ -84,15 +82,15 @@ const CourseCard = ({ element }) => {
 
     const handleUnSubscribe = (courseId) => {
         setIsLoading(true)
-        const response = subscriptionService.handleUnsubscribe(courseId)
+        subscriptionService.handleUnsubscribe(courseId)
             .then(
                 () => {
                     dispatch(
                         get_page_of_courses(currentPage, pageSize, orderColumnName, orderBy, searchString)
-                        )
+                    )
                     dispatch(
                         get_user_subscriptions()
-                        )
+                    )
                     notification.success(
                         {
                             message: "Success",
@@ -111,6 +109,7 @@ const CourseCard = ({ element }) => {
             .catch(
                 (error) => {
                     console.log(error)
+                    setIsLoading(false)
                     notification.error(
                         {
                             message: "Error",
@@ -142,9 +141,9 @@ const CourseCard = ({ element }) => {
                         src={element.courseImgUrl}
                         width={"80%"}
                         preview={false}
-                        placeholder = {
+                        placeholder={
                             <Spin indicator={antIcon}
-                            size="large"></Spin>
+                                size="large"></Spin>
                         }
                     />
                 }

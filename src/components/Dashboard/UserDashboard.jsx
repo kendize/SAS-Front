@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { LoadingOutlined, SyncOutlined } from '@ant-design/icons';
-import { Form, Button, Pagination, Table, Popconfirm, message, Input, Col, Space, Modal, Typography, Spin, Select, Divider, Row } from 'antd';
+import { SyncOutlined } from '@ant-design/icons';
+import { Form, Button, Pagination, Table, Popconfirm, Input, Col, Space, Modal, Typography, Spin, Select, Divider, Row, notification } from 'antd';
 import { get_page_of_users } from '../../store/actionCreators/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
-import { apiClient } from '../../utils/API';
 import store from '../../store/store';
 import { Redirect } from 'react-router';
-import { isAdmin } from '../../utils';
 import { RELOAD } from '../../store/actions';
+import dashboardService from '../../services/dashboardService';
 const { Search } = Input;
 const { Text } = Typography;
 const { Option } = Select;
@@ -16,7 +15,6 @@ export default function UserDashboard() {
   const antIcon = <SyncOutlined style={{ fontSize: 36 }} spin />;
   const dispatch = useDispatch();
   const userList = useSelector((store) => store.dashboard.userList);
-  const [Data, setData] = useState(userList);
   const [currentPage, setCurrentPage] = useState(1)
   const [numberOfUsers, setNumberOfUsers] = useState(1)
   const [orderColumnName, setOrderColumnName] = useState("Id")
@@ -68,22 +66,31 @@ export default function UserDashboard() {
         type: RELOAD
       }
     )
-    apiClient.put("https://localhost:44349/api/admin", {
-      id: userId,
-      firstname: FirstName,
-      lastname: LastName,
-      age: Age,
-      email: Email
-    }, {
-      "Content-Type": "application/json"
-    })
+    dashboardService.handleUserEdit(userId, FirstName, LastName, Age, Email)
       .then(function (response) {
         console.log(response);
         setEditUserVisible(false);
         dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString, searchColumn));
+        notification.success(
+          {
+            message: "Success",
+            description: "User Edit Success!",
+            duration: 2,
+            placement: 'bottomRight'
+          }
+        )
       })
       .catch(function (error) {
         console.log(error);
+        setEditUserVisible(false);
+        notification.error(
+          {
+            message: "Error",
+            description: "User Edit Error!",
+            duration: 2,
+            placement: 'bottomRight'
+          }
+        )
       });
 
   }
@@ -94,20 +101,34 @@ export default function UserDashboard() {
         type: RELOAD
       }
     )
-    apiClient.delete(`https://localhost:44349/api/admin/${id}`,
-      {
-        headers: {
-          "Accept": "application/json",
-          'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
-        },
-      })
-      .finally(() => {
-        setCurrentPage(1);
-        dispatch(get_page_of_users(1, pageSize, orderColumnName, orderBy, searchString, searchColumn));
-        setNumberOfUsers(store.getState().dashboard.numberOfUsers)
-        setData(userList);
+    dashboardService.handleUserDelete(id)
+      .then(
+        () => {
+          dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString, searchColumn));
+          setNumberOfUsers(store.getState().dashboard.numberOfUsers)
+          notification.success(
+            {
+              message: "Success",
+              description: "User Deleted Successfully!",
+              duration: 2,
+              placement: 'bottomRight'
+            }
+          )
+        })
+      .catch(
+        (error) => {
+          console.log(error)
+          notification.error(
+            {
+              message: "Error",
+              description: "User wasn't deleted!",
+              duration: 2,
+              placement: 'bottomRight'
+            }
+          )
+        }
+      )
 
-      })
   }
 
   const handleSorting = (pagination, filters, sorter) => {
@@ -116,7 +137,6 @@ export default function UserDashboard() {
         type: RELOAD
       }
     )
-    //setCurrentPage(1);
     setOrderColumnName(sorter.field)
     setOrderBy(sorter.order)
     dispatch(get_page_of_users(currentPage, pageSize, sorter.field, sorter.order, searchString, searchColumn))
@@ -135,21 +155,31 @@ export default function UserDashboard() {
     setSearchString(SearchString);
     setSearchColumn(SearchColumn);
     dispatch(get_page_of_users(pageNumber, pageSize, ColumnName, OrderBy, SearchString, SearchColumn));
-    //setNumberOfUsers(store.getState().dashboard.numberOfUsers)// ?
-    setData(userList);
-    //console.log("Current Page: " + pageNumber)
+
 
   }
 
+  // Початкове завантаження сторінки користувачів
   useEffect(() => {
     dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString, searchColumn));
   }, [])
 
   useEffect(() => {
-    setData(userList);
     setNumberOfUsers(store.getState().dashboard.numberOfUsers)
     setCurrentPage(currentPage)
   }, [store.getState().dashboard.userList, store.getState().dashboard.numberOfUsers, currentPage, numberOfUsers])
+
+  // Якщо сторінка порожня (наприклад, після видалення останнього користувача на сторінці) - перейти на попередню сторінку
+  useEffect(
+    () => {
+      if (userList.length === 0 && currentPage > 1) {
+        setCurrentPage(currentPage - 1)
+        dispatch(get_page_of_users(currentPage - 1, pageSize, orderColumnName, orderBy, searchString, searchColumn));
+
+        setNumberOfUsers(store.getState().dashboard.numberOfUsers)
+      }
+    }, [userList]
+  )
 
   const dashboardColumns = [
     {
@@ -204,7 +234,7 @@ export default function UserDashboard() {
           <Popconfirm
             title="Delete this user?"
             onConfirm={() => handleDelete(record.id)}
-            onCancel={(e) => console.log(e)}//onClick={() => handleDelete(record.id)}
+            onCancel={(e) => console.log(e)}
             okText="Yes"
             cancelText="No">
             <Button
@@ -221,13 +251,6 @@ export default function UserDashboard() {
   ];
 
   const expandedColumns = [
-    //{
-    //  title: "Course Id",
-    //  dataIndex: 'courseId',
-    //  key: 'id',
-    //  sortDirections: ['ascend', 'descend', 'ascend'],
-    //  render: (record) => <p>{record}</p>
-    //},
     {
       title: "Course name",
       dataIndex: ["course", "courseName"],
@@ -278,7 +301,9 @@ export default function UserDashboard() {
                     type="text"
                     value={FirstName}
                     placeholder="First Name"
-                    onChange={event => setFirstName(event.target.value)}
+                    onChange={
+                      event => setFirstName(event.target.value)
+                    }
                     style={{ width: '400px' }}
                   />
                 </Form.Item>
@@ -290,7 +315,9 @@ export default function UserDashboard() {
                     type="text"
                     value={LastName}
                     placeholder="Last Name"
-                    onChange={event => setLastName(event.target.value)}
+                    onChange={
+                      event => setLastName(event.target.value)
+                    }
                     style={{ width: '400px' }}
                   />
                 </Form.Item>
@@ -325,60 +352,64 @@ export default function UserDashboard() {
         </Modal>
 
         <Row>
-          <Col offset = {1} span = {22}>
-        <Select
-          labelInValue
-          defaultValue={{ value: searchColumn }}
-          style={{ width: 120 }}
-          onChange={(value) => changeSearchColumn(value.value)}
-        >
-          <Option value="FirstName">First Name</Option>
-          <Option value="LastName">Last Name</Option>
-          <Option value="Email">Email</Option>
-        </Select>
-        <Divider type="vertical"></Divider>
-        <Search placeholder="Search" allowClear onSearch={(string) => {
-          //setSearchString(string);
-          handleChangeOfPage(currentPage, orderColumnName, orderBy, string, searchColumn)
-          //dispatch(get_page_of_users(currentPage, pageSize, orderColumnName, orderBy, searchString))
-        }
-        } style={{ width: 200 }} /><br /><br />
-        <Spin
-          indicator={antIcon}
-          size="large"
-          spinning={isLoading}>
-          <Table
-            dataSource={userList}
-            columns={dashboardColumns}
-            pagination={false}
-            onChange={handleSorting}
-            onExpand={(expanded, record) => { handleExpand(expanded, record); }}
-            rowKey="id"
-            expandedRowKeys={expandedKey}
-            expandable={
-              {
-
-                rowExpandable: record => record.userCourses.length != 0,
-                expandedRowRender: (record) =>
-                  <Table
-                    dataSource={record.userCourses}
-                    columns={expandedColumns}
-                    pagination={false}
-                    bordered
-
-                  />
-              }
+          <Col offset={1} span={22}>
+            <Select
+              labelInValue
+              defaultValue={{ value: searchColumn }}
+              style={{ width: 120 }}
+              onChange={(value) => changeSearchColumn(value.value)}
+            >
+              <Option value="FirstName">First Name</Option>
+              <Option value="LastName">Last Name</Option>
+              <Option value="Email">Email</Option>
+            </Select>
+            <Divider type="vertical"></Divider>
+            <Search placeholder="Search" allowClear onSearch={(string) => {
+              handleChangeOfPage(currentPage, orderColumnName, orderBy, string, searchColumn)
             }
+            } style={{ width: 200 }} /><br /><br />
+            <Spin
+              indicator={antIcon}
+              size="large"
+              spinning={isLoading}>
+              <Table
+                dataSource={userList}
+                columns={dashboardColumns}
+                pagination={false}
+                onChange={handleSorting}
+                onExpand={(expanded, record) => { handleExpand(expanded, record); }}
+                rowKey="id"
+                expandedRowKeys={expandedKey}
+                expandable={
+                  {
 
-          /></Spin>
-        <br />
-        <Pagination сurrent={currentPage}
-          pageSize={5}
-          total={numberOfUsers}//{store.getState().dashboard.numberOfUsers}
-          onChange={(page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)} />
+                    rowExpandable: record => record.userCourses.length !== 0,
+                    expandedRowRender: (record) =>
+                      <Table
+                        dataSource={record.userCourses}
+                        columns={expandedColumns}
+                        pagination={false}
+                        bordered
+
+                      />
+                  }
+                }
+
+              />
+            </Spin>
+            <br />
+            <Pagination сurrent={currentPage || 1}
+              pageSize={5}
+              total={numberOfUsers}
+              onChange={
+                (page) => handleChangeOfPage(page, orderColumnName, orderBy, searchString)
+              }
+            />
           </Col>
-          </Row>
-      </div> : <Redirect exact to="/401" />}</>
+        </Row>
+      </div>
+        :
+        <Redirect exact to="/401" />}</>
   );
 
 }

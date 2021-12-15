@@ -1,27 +1,25 @@
 import {
     BrowserRouter as Router,
     Switch,
-    Route,
     Link
 } from "react-router-dom";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Registration from '../Registration/Registration';
 import UserDashboard from '../Dashboard/UserDashboard'
 import CourseDashboard from '../Dashboard/CourseDashboard'
-import Home from '../../Home'
+//import Home from '../../Home'
 import Login from '../Login/Login'
 import { useDispatch, useSelector } from 'react-redux'
-import { Breadcrumb, Button, Menu, Row, Col, Space, Card, Divider } from 'antd';
+import { Button, Menu, Row, Col, Space, Card } from 'antd';
 import { logout } from "../../store/actionCreators/Authentication";
 import PublicRoute from "../../utils/PublicRoute";
 import PrivateRoute from "../../utils/PrivateRoute";
 import { getFirstName, getLastName, isLogin } from "../../utils";
-import store from "../../store/store";
 import Courses from "../Courses/Courses";
 import EmailConfirmation from "../Profile/EmailConfirmation";
-import axios from "axios";
 import Error_401 from "../Errors/401";
 import Profile from "../Profile/Profile";
+import Home from "../Home/Home";
 
 const { SubMenu } = Menu;
 
@@ -36,61 +34,58 @@ const NavigationBar = () => {
             }
         }
     )
-    const test = () => {
-        axios.get("https://localhost:44349/Hangfire",
-            { headers: { "Authorization": 'Bearer ' + localStorage.getItem("accessToken"), } }
-        )
-        //axios.defaults.headers['Authorization'] = 'Bearer ' + localStorage.getItem("accessToken");
-    }
+
     const auth = state.authorized
 
     const isAdmin = state.isAdmin
 
     return (
-        <div  style = {{backgroundColor: '#fafafa'}}>
+        <div style={{ backgroundColor: '#fafafa' }}>
             <Router>
-                <div style = {{backgroundColor: '#2C294B', padding: '7px'}}>
-                    
+                <div style={{ backgroundColor: '#2C294B', padding: '7px' }}>
+
                     <Row align="middle">
-                    <Col offset={1} span={6}>
+                        <Col offset={1} span={6}>
                             <Menu
-                            mode = "horizontal"
-                            style = {{ backgroundColor: "#2C294B"}}
-                            theme = 'dark'
-                            selectedKeys = {[]}
+                                mode="horizontal"
+                                style={{ backgroundColor: "#2C294B" }}
+                                theme='dark'
+                                selectedKeys={[]}
                             >
-                            
-                                <Menu.Item key = 'home'>
+
+                                <Menu.Item key='home'>
                                     <Link to="/">Home</Link>
                                 </Menu.Item>
-                                {auth ?
+                                {auth
+                                    ?
                                     <>
-                                        {isAdmin && 
+                                        {isAdmin
+                                            &&
                                             <>
-                                                    <SubMenu key = "DashboardSubMenu" title = "Dashboard" style = {{ backgroundColor: "#2C294B"}}>
-                                                        <Menu.Item>
-                                                            <Link to="/UserDashboard">Users</Link>
-                                                        </Menu.Item>
-                                                        <Menu.Item>
-                                                            <Link to="/CourseDashboard">Courses</Link>
-                                                        </Menu.Item>
-                                                        <Menu.Item>
-                                                            <a href="https://localhost:44349/Hangfire" onClick={() => test()}>Hangfire</a>
-                                                        </Menu.Item>
-                                                    </SubMenu>
+                                                <SubMenu key="DashboardSubMenu" title="Dashboard" style={{ backgroundColor: "#2C294B" }}>
+                                                    <Menu.Item>
+                                                        <Link to="/UserDashboard">Users</Link>
+                                                    </Menu.Item>
+                                                    <Menu.Item>
+                                                        <Link to="/CourseDashboard">Courses</Link>
+                                                    </Menu.Item>
+                                                    <Menu.Item>
+                                                        <a href="https://localhost:44349/Hangfire" >Hangfire</a>
+                                                    </Menu.Item>
+                                                </SubMenu>
                                             </>
-                                            }
-                                        <Menu.Item key = 'courses'>
+                                        }
+                                        <Menu.Item key='courses'>
                                             <Link to="/Courses">Courses</Link>
                                         </Menu.Item>
                                     </>
                                     :
                                     <>
-                                        <Menu.Item key = 'login'>
+                                        <Menu.Item key='login'>
                                             <Link to="/Login">Authentication</Link>
                                         </Menu.Item>
 
-                                        <Menu.Item key = 'registration'>
+                                        <Menu.Item key='registration'>
                                             <Link to="/Registration"> Registration</Link>
                                         </Menu.Item>
                                     </>
@@ -100,7 +95,9 @@ const NavigationBar = () => {
                         <Col offset={13}>
                             {
                                 isLogin() ?
-                                    <Card bodyStyle={{ padding: "12px" }} style={{ borderRadius: "15px" }} hoverable>
+                                    <Card bodyStyle={{ padding: "12px" }}
+                                        style={{ borderRadius: "15px" }}
+                                        hoverable>
                                         <Space align="baseline">
                                             <Link to="/Profile">{getFirstName() + "  " + getLastName() + "  "}</Link>
                                             <Button
@@ -115,9 +112,9 @@ const NavigationBar = () => {
                             }
                         </Col>
                     </Row>
-                    </div>
-                    <br/>
-                
+                </div>
+                <br />
+
 
                 <Switch>
                     <PublicRoute exact path="/" component={Home} />
