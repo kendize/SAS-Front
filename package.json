@@ -23,11 +23,11 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "set HTTPS=true&&set SSL_CRT_FILE=src/utils/cert.crt&&set SSL_KEY_FILE=src/utils/cert.key&&react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "netlify": "react-scripts start"
+    "netlify": "set HTTPS=true&&set SSL_CRT_FILE=src/utils/cert.crt&&set SSL_KEY_FILE=src/utils/cert.key&&react-scripts start"
   },
   "eslintConfig": {
     "extends": [
