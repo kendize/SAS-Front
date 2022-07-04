@@ -8,6 +8,6 @@ RUN npm i && \
     npm run build
 
 
-EXPOSE 8000
+EXPOSE 80
 
 CMD ["npm", "start"]
